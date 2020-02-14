@@ -1,4 +1,6 @@
-import wx
+import sys, wx
+sys.path.append('../../')
+from skimage.draw import line
 from sciwx.canvas.widget import CanvasFrame
 from sciwx.canvas.event import Tool, DefaultTool
 

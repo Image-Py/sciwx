@@ -1,3 +1,5 @@
+import sys
+sys.path.append('../../')
 from skimage.data import astronaut, camera
 from numpy.fft import fft2, fftshift
 from sciwx.canvas import Canvas

@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../../')
+
 from skimage.data import astronaut, camera
 from sciwx.canvas import CanvasFrame, CanvasNoteFrame
 import wx
