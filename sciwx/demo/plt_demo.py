@@ -11,4 +11,6 @@ if __name__ == '__main__':
     plt.imshow(camera())
     plt.imstackshow([astronaut(), 255-astronaut()], cn=0)
     plt.tabshow(pd.DataFrame(np.zeros((100,5))))
+    plt.txtshow('abcdefg')
+    plt.mdshow('#Markdown\n## paragraph')
     plt.show()

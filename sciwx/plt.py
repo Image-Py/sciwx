@@ -1,6 +1,7 @@
 import wx
 from .canvas import CanvasFrame
 from .grid import GridFrame
+from .text import MDFrame, TextFrame
 
 app = None
 
@@ -31,5 +32,18 @@ def tabshow(tab):
     gf.Show()
     return gf
 
+def txtshow(txt):
+    new_app()
+    tf = TextFrame(None)
+    tf.append(txt)
+    tf.Show()
+    return tf
+def mdshow(txt):
+    new_app()
+    new_app()
+    mf = MDFrame(None)
+    mf.set_cont(txt)
+    mf.Show()
+    return mf
 
 def show(): app.MainLoop()
