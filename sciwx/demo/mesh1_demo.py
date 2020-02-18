@@ -1,8 +1,8 @@
 import sys, wx
 sys.path.append('../../')
 
-from sciwx.surface import Canvas3D, MCanvas3D, geoutil
-from sciwx.surface import Canvas3DFrame, Canvas3DNoteBook, Canvas3DNoteFrame
+from sciwx.mesh import Canvas3D, MCanvas3D, geoutil
+from sciwx.mesh import Canvas3DFrame, Canvas3DNoteBook, Canvas3DNoteFrame
 
 vts, fs, ns, cs = geoutil.build_ball((100,100,100),50, (1,0,0))
 

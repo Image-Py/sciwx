@@ -3,7 +3,7 @@ import moderngl
 import numpy as np
 import wx, math
 import wx.glcanvas as glcanvas
-from .mesh import *
+from .surface import *
 import os.path as osp
 from pubsub import pub
 from .geoutil import *

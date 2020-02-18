@@ -1,4 +1,4 @@
-from .paradialog import ParaDialog
+from .paradialog import ParaDialog, get_para
 from .cmappanel import CMapPanel
 from .colormap import CMapSelPanel
 from .curvepanel import CurvePanel
