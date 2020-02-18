@@ -41,7 +41,7 @@ class Table():
         return self.props
 
     def set_style(self, col, **key):
-        for i, name in enumerate(['round', 'tc', 'lc', 'ln']):
+        for i, name in enumerate(['accu', 'tc', 'lc', 'ln']):
             if name in key: self.style[col][i] = key[name]
 
     def count_range(self):

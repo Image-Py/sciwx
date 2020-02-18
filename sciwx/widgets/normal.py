@@ -136,7 +136,7 @@ class ColorCtrl(wx.Panel):
         if len(rgb)!=7 or rgb[0]!='#': return None
         try: rgb = int(rgb[1:], 16)
         except: return None
-        return wx.Colour(rgb).Get(False)
+        return wx.Colour(rgb).Get(False)[::-1]
 
 class PathCtrl(wx.Panel):
     def __init__(self, parent, title, filt):

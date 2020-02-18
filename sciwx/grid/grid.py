@@ -5,6 +5,7 @@ import sys
 
 import numpy as np
 import pandas as pd
+from ..widgets import get_para
 
 
 class TableBase(wx.grid.GridTableBase):
@@ -178,26 +179,28 @@ class Grid(wx.grid.Grid):
         self.Bind(wx.grid.EVT_GRID_LABEL_RIGHT_CLICK, self.on_label)
 
     def on_label(self, evt):
-        # Did we click on a row or a column?
         row, col = evt.GetRow(), evt.GetCol()
         if row==-1:
             props = self.table.props
             
-            cur = props.iloc[:,col]
+            cur = props[self.table.columns[col]]
+            print(cur)
             para = {'accu':cur[0], 'tc':cur[1], 'lc':cur[2], 'ln':cur[3]}
             view = [(int, 'accu', (0, 10), 0, 'accuracy', ''),
                     ('color', 'tc', 'text color', ''),
                     ('color', 'lc', 'line color', ''),
                     (list, 'ln', ['Text', 'Line', 'Both'], str, 'draw', '')]
-            rst = IPy.get_para('Table Properties', view, para)
+            rst = get_para(para, view, 'Table Properties', self)
             if not rst :return
+            print(para)
             if col!=-1:
-                props.iloc[:,col] = [para[i] for i in ['accu', 'tc', 'lc', 'ln']]
+                props[self.table.columns[col]] = [para[i] for i in ['accu', 'tc', 'lc', 'ln']]
+                print(props[self.table.columns[col]])
+                print('===========')
             if col==-1:
-                for c in range(props.shape[1]):
-                    props.iloc[:,c] = [para[i] for i in ['accu', 'tc', 'lc', 'ln']]
-
-        # self.tps.update()
+                for c in self.table.columns:
+                    props[c] = [para[i] for i in ['accu', 'tc', 'lc', 'ln']]
+        self.update()
 
     def set_data(self, tab):
         if isinstance(tab, Table):

@@ -77,12 +77,17 @@ class GridNoteFrame(wx.Frame):
         self.SetSizer(sizer)
         self.add_grid = self.notebook.add_grid
         self.Layout()
+        self.Bind(wx.EVT_CLOSE, self.on_close)
 
     def add_toolbar(self):
         toolbar = ToolBar(self)
         self.GetSizer().Insert(0, toolbar, 0, wx.EXPAND | wx.ALL, 0)
         return toolbar 
 
+    def on_close(self, event):
+        while self.notebook.GetPageCount()>0:
+            self.notebook.DeletePage(0)
+        event.Skip()
 
 if __name__=='__main__':
     from skimage.data import camera, astronaut
