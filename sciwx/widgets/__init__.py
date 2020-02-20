@@ -5,4 +5,5 @@ from .curvepanel import CurvePanel
 from .histpanel import HistPanel
 from .normal import *
 from .toolbar import ToolBar
+from .menubar import MenuBar
 from .viewport import ViewPort

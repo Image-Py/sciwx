@@ -3,7 +3,7 @@ from .boxutil import cross, multiply, lay, mat
 from .imutil import mix_img
 from .mark import drawmark
 from .image import Image
-from .event import Tool, DefaultTool
+from ..event import Tool, DefaultTool
 from time import time
 
 class Canvas (wx.Panel):
@@ -173,7 +173,11 @@ class Canvas (wx.Panel):
         if self.image.img is None: return
         self.update()
 
-    def on_idle(self, event):pass
+    def on_idle(self, event):
+        if not self.image.dirty: return
+        else:
+            self.image.dirty = False
+            return self.update()
 
     def on_paint(self, event):
         if self.buffer is None: return

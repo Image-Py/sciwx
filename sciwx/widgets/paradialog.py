@@ -115,8 +115,10 @@ class ParaDialog (wx.Dialog):
 
     def get_para(self): return self.para
 
-    def set_handle(self, handle=None):
-        self.handle = handle if not handle is None else print
+    def Bind(self, tag, f):
+        if tag == 'parameter': self.handle = f if not f is None else print
+        if tag == 'commit': self.on_ok = f
+        if tag == 'cancel': self.on_cancel = f
 
     def __del__( self ):
         print('panel config deleted!')

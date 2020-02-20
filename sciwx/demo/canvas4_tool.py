@@ -1,7 +1,8 @@
 import sys
 sys.path.append('../../')
 from skimage.data import astronaut, camera
-from sciwx.canvas import Canvas, Tool
+from sciwx.canvas import Canvas
+from sciwx.event import Tool
 import wx
 
 class TestTool:

@@ -1,6 +1,7 @@
 import wx, wx.lib.agw.aui as aui
 from .mcanvas import MCanvas
-from ..widgets.toolbar import ToolBar
+from ..widgets import ToolBar, MenuBar
+from ..event import pubsub
 
 class CanvasFrame(wx.Frame):
     def __init__(self, parent=None, autofit=False):
@@ -13,7 +14,7 @@ class CanvasFrame(wx.Frame):
         self.canvas = MCanvas(self, autofit=autofit)
         sizer.Add(self.canvas, 1, wx.EXPAND|wx.ALL, 0)
         self.SetSizer(sizer)
-        
+
         self.set_rg = self.canvas.set_rg
         self.set_lut = self.canvas.set_rg
         self.set_log = self.canvas.set_log
@@ -23,22 +24,38 @@ class CanvasFrame(wx.Frame):
         self.set_img = self.canvas.set_img
         self.set_cn = self.canvas.set_cn
 
+        pubsub.publish('on_img_new', self.canvas.image)
+        pubsub.publish('on_wimg_new', self.canvas)
+
         self.Bind(wx.EVT_IDLE, self.on_idle)
+        self.Bind(wx.EVT_ACTIVATE, self.on_valid)
+        self.Bind(wx.EVT_CLOSE, self.on_close)
 
     def on_idle(self, event):
         if self.GetTitle()!=self.canvas.image.title:
             self.SetTitle(self.canvas.image.title)
-    
+
     def set_title(self, ips): self.SetTitle(ips.title)
 
-    def on_valid(self, event): event.Skip()
+    def on_valid(self, event): 
+        pubsub.publish('on_img_active', self.canvas.image)
+        pubsub.publish('on_wimg_active', self.canvas)
 
-    def on_close(self, event): event.Skip()
+    def on_close(self, event): 
+        pubsub.publish('on_img_remove', self.canvas.image)
+        pubsub.publish('on_wimg_remove', self.canvas)
+        self.Bind(wx.EVT_ACTIVATE, None)
+        event.Skip()
 
     def add_toolbar(self):
         toolbar = ToolBar(self)
         self.GetSizer().Insert(0, toolbar, 0, wx.EXPAND | wx.ALL, 0)
-        return toolbar        
+        return toolbar
+
+    def add_menubar(self):
+        menubar = MenuBar()
+        self.SetMenuBar(menubar)
+        return menubar
 
 class CanvasNoteBook(wx.lib.agw.aui.AuiNotebook):
     def __init__(self, parent):
@@ -65,14 +82,20 @@ class CanvasNoteBook(wx.lib.agw.aui.AuiNotebook):
     def add_canvas(self, mcanvas=None):
         if mcanvas is None: mcanvas = MCanvas(self)
         self.AddPage(mcanvas, 'Image', True, wx.NullBitmap )
+        pubsub.publish('on_img_new', mcanvas.image)
+        pubsub.publish('on_wimg_new', mcanvas)
         return mcanvas
 
     def set_title(self, panel, title):
         self.SetPageText(self.GetPageIndex(panel), title)
 
-    def on_valid(self, event): pass
+    def on_valid(self, event): 
+        pubsub.publish('on_img_active', self.canvas().image)
+        pubsub.publish('on_wimg_active', self.canvas())
 
-    def on_close(self, event): pass
+    def on_close(self, event): 
+        pubsub.publish('on_img_remove', self.canvas().image)
+        pubsub.publish('on_img_remove', self.canvas())
 
 class CanvasNoteFrame(wx.Frame):
     def __init__(self, parent):
@@ -94,13 +117,16 @@ class CanvasNoteFrame(wx.Frame):
         toolbar = ToolBar(self)
         self.GetSizer().Insert(0, toolbar, 0, wx.EXPAND | wx.ALL, 0)
         return toolbar 
+
+    def add_menubar(self):
+        menubar = MenuBar()
+        self.SetMenuBar(menubar)
+        return menubar
         
     def on_close(self, event):
         while self.notebook.GetPageCount()>0:
             self.notebook.DeletePage(0)
         event.Skip()
-        
-
     
 if __name__=='__main__':
     from skimage.data import camera, astronaut

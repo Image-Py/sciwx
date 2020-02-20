@@ -1,4 +1,6 @@
-class Tool:
+from .event import SciEvent
+
+class Tool(SciEvent):
     title = 'Base Tool'
     default = None
     def mouse_down(self, image, x, y, btn, **key): pass

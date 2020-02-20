@@ -12,6 +12,8 @@ class Image:
         self.log = False
         self.mode = 'set'
         self.cur = 0
+        self.dirty = False
+        self.snap = None
 
     @property
     def title(self): return self.name
@@ -44,6 +46,19 @@ class Image:
     def info(self):
         return '%sx%s  S:%s/%s  C:%s/%s'%(*self.shape,
             self.cur+1, self.slices, self.cn, self.channels)
+
+    def update(self): self.dirty = True
+
+    def snapshot(self):
+        if self.snap is None:
+            self.snap = self.img.copy()
+        else: self.snap[:] = self.img
+
+    def swap(self):
+        if self.snap is None:return
+        buf = self.img.copy()
+        self.img[:], self.snap[:] = self.snap, buf
+        print('swap')
 
 if __name__ == '__main__':
     img = Image(np.zeros((5,5)))
