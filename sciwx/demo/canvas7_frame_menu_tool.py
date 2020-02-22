@@ -16,13 +16,10 @@ class Gaussian(ImgEvent):
 
 class Undo(ImgEvent):
     title = 'Undo'
-    def run(self, ips, img, snap, para):
-        print(ips.img.mean(), ips.snap.mean())
-        ips.swap()
+    def run(self, ips, img, snap, para): ips.swap()
 
 class Pencil(Tool):
     title = 'Pencil'
-        
     def __init__(self):
         self.status = False
         self.oldp = (0,0)
@@ -57,8 +54,7 @@ if __name__=='__main__':
     cf.set_cn(0)
     bar = cf.add_menubar()
     bar.load(('menu',[('Filter',[('Gaussian', Gaussian),
-                                 ('Unto', Undo)]),
-                      ]))
+                                 ('Unto', Undo)]),]))
     
     bar = cf.add_toolbar()
     bar.add_tool(DefaultTool, 'M')

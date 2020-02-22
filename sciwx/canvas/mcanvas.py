@@ -6,8 +6,6 @@ from .image import Image
 class MCanvas(wx.Panel):
     def __init__(self, parent=None, autofit=False):
         wx.Frame.__init__ ( self, parent)
-
-        self.SetSizeHints( wx.Size( 560,-1 ), wx.DefaultSize )
         
         self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
         self.SetBackgroundColour( wx.Colour( 255, 255, 255 ) )
@@ -60,6 +58,9 @@ class MCanvas(wx.Panel):
     @property
     def image(self): return self.canvas.image
 
+    @property
+    def name(self): return self.canvas.image.name
+
     def set_imgs(self, imgs, b=False):
         if b: self.canvas.back.imgs = imgs
         else: self.canvas.image.imgs = imgs
@@ -96,6 +97,7 @@ class MCanvas(wx.Panel):
         self.canvas.update()
         if self.lab_info.GetLabel()!=self.image.info:
             self.lab_info.SetLabel(self.image.info)
+        self.Layout()
 
     def on_scroll(self, event):
         self.image.cur = self.sli_page.GetThumbPosition()

@@ -1,8 +1,10 @@
 import wx
 
 class MenuBar(wx.MenuBar):
-    def __init__(self):
+    def __init__(self, app):
         wx.MenuBar.__init__(self)
+        self.app = app
+        app.SetMenuBar(self)
 
     def parse(self, ks, vs, pt):
         if isinstance(vs, list):
@@ -13,7 +15,7 @@ class MenuBar(wx.MenuBar):
             pt.Append(1, ks, menu)
         else:
             item = wx.MenuItem(pt, -1, ks)
-            f = lambda e, p=vs: p().start()
+            f = lambda e, p=vs: p(self.app).start()
             self.Bind(wx.EVT_MENU, f, item)
             pt.Append(item)
 

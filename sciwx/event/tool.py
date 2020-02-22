@@ -11,7 +11,8 @@ class Tool(SciEvent):
 
 class DefaultTool(Tool):
     title = 'Move And Scale'
-    def __init__(self): self.oldxy = None
+    def __init__(self, app): 
+        self.oldxy = None
         
     def mouse_down(self, image, x, y, btn, **key):
         if btn==1: self.oldxy = key['px'], key['py']
@@ -30,4 +31,4 @@ class DefaultTool(Tool):
         if d>0: key['canvas'].zoomout(x, y, coord='data')
         if d<0: key['canvas'].zoomin(x, y, coord='data')
 
-DefaultTool().start()
+DefaultTool(None).start()

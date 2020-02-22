@@ -28,12 +28,13 @@ class ToolBar(wx.Panel):
         wx.Panel.__init__( self, parent, wx.ID_ANY,  wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         sizer = wx.BoxSizer( (wx.HORIZONTAL, wx.VERTICAL)[vertical] )
         self.SetSizer( sizer )
+        self.app = parent
         self.toolset = []
 
     def bind(self, btn, tol):
-        btn.Bind( wx.EVT_LEFT_DOWN, lambda x, obj=tol: obj().start())
+        btn.Bind( wx.EVT_LEFT_DOWN, lambda x, obj=tol: obj(self.app).start())
             
-    def add_tool(self, tool, logo):
+    def add_tool(self, logo, tool):
         btn = wx.BitmapButton(self, wx.ID_ANY, make_logo(self, logo), 
             wx.DefaultPosition, (32,32), wx.BU_AUTODRAW|wx.RAISED_BORDER )
         self.bind(btn, tool)
@@ -41,7 +42,7 @@ class ToolBar(wx.Panel):
 
     def add_tools(self, name, tools, fixed=True):
         if not fixed: self.toolset.append((name, []))
-        for tool, logo in tools:
+        for logo, tool in tools:
             btn = wx.BitmapButton(self, wx.ID_ANY, make_logo(self, logo), 
                 wx.DefaultPosition, (32,32), wx.BU_AUTODRAW|wx.RAISED_BORDER )
             self.bind(btn, tool)
@@ -82,9 +83,9 @@ if __name__ == '__main__':
     app = wx.App()
     frame = wx.Frame(None)
     tool = ToolBar(frame)
-    tool.add_tools('A', [(None, 'A')] * 3)
-    tool.add_tools('B', [(None, 'B')] * 3, False)
-    tool.add_tools('C', [(None, 'C')] * 3, False)
+    tool.add_tools('A', [('A', None)] * 3)
+    tool.add_tools('B', [('B', None)] * 3)
+    tool.add_tools('C', [('C', None)] * 3)
     tool.add_pop('P', 'B')
     tool.Layout()
     frame.Fit()

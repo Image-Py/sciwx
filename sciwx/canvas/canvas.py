@@ -105,7 +105,7 @@ class Canvas (wx.Panel):
         start = time()
         lay(self.winbox, self.conbox)
         dc = wx.BufferedDC(wx.ClientDC(self), self.buffer)
-        dc.SetBackground(wx.Brush((255,255,255)))
+        #dc.SetBackground(wx.Brush((255,255,255)))
         dc.Clear()
         self.draw_image(dc, self.image.img, self.back.img, 0)
         for i in self.marks:

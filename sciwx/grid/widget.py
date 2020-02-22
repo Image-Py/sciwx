@@ -1,6 +1,28 @@
 import wx, wx.lib.agw.aui as aui
 from .grid import Grid
 
+class MGrid(wx.Panel):
+    def __init__(self, parent=None, autofit=False):
+        wx.Frame.__init__ ( self, parent)
+        self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
+        
+        self.SetBackgroundColour( wx.Colour( 255, 255, 255 ) )
+        sizer = wx.BoxSizer( wx.VERTICAL )
+        self.lab_info = wx.StaticText( self, wx.ID_ANY,
+            'information', wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.lab_info.Wrap( -1 )
+        # self.lab_info.Hide()
+        sizer.Add( self.lab_info, 0, wx.ALL, 0 )
+        
+        self.grid = Grid(self)
+        sizer.Add( self.grid, 1, wx.EXPAND |wx.ALL, 0 )
+        self.SetSizer(sizer)
+        self.select = self.grid.select
+        self.set_data = self.grid.set_data
+
+    @property
+    def table(self): return self.grid.table
+
 class GridFrame(wx.Frame):
     def __init__(self, parent=None):
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY,
@@ -9,7 +31,7 @@ class GridFrame(wx.Frame):
                             size = wx.Size( 800, 600 ),
                             style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
         sizer = wx.BoxSizer(wx.VERTICAL)
-        self.grid = Grid(self)
+        self.grid = MGrid(self)
         sizer.Add(self.grid, 1, wx.EXPAND|wx.ALL, 0)
         self.SetSizer(sizer)
         self.set_data = self.grid.set_data
@@ -52,7 +74,7 @@ class GridNoteBook(wx.lib.agw.aui.AuiNotebook):
         self.GetAuiManager().SetArtProvider(ImgArtProvider(img))
 
     def add_grid(self, grid=None):
-        if grid is None: grid = Grid(self)
+        if grid is None: grid = MGrid(self)
         self.AddPage(grid, 'Image', True, wx.NullBitmap )
         return grid
 

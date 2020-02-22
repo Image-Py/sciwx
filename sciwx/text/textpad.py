@@ -1,14 +1,15 @@
 import wx, wx.lib.agw.aui as aui
 
 class TextPad(wx.Panel):
-    def __init__(self, parent):
+    def __init__(self, parent, cont='', title='no name'):
         wx.Panel.__init__(self, parent, size=(500,300))
         self.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_3DLIGHT ) )
-        self.file='no name'
+        self.title = title
         
         sizer = wx.BoxSizer( wx.VERTICAL )
         self.text= wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, 
                                 wx.DefaultPosition, wx.DefaultSize, wx.TE_MULTILINE )
+        self.text.SetValue(cont)
         sizer.Add( self.text, 1, wx.ALL|wx.EXPAND, 1 )
         self.SetSizer( sizer )
         
@@ -17,27 +18,27 @@ class TextPad(wx.Panel):
     def OnOpen(self,event):
         dialog=wx.FileDialog(self,'wxpython Notebook(o)',style=wx.FD_OPEN)
         if dialog.ShowModal()==wx.ID_OK:
-            self.file=dialog.GetPath()
-            file=open(self.file)
-            self.text.write(file.read())
-            file.close()
+            self.title=dialog.GetPath()
+            title=open(self.title)
+            self.text.write(title.read())
+            title.close()
         dialog.Destroy()
 
     def OnSave(self,event):
-        if self.file=='':
+        if self.title=='':
             dialog=wx.FileDialog(self,'wxpython Notebook(s)',style=wx.FD_SAVE)
             if dialog.ShowModal()==wx.ID_OK:
-                self.file=dialog.GetPath()
-                self.text.SaveFile(self.file)
+                self.filtitlee=dialog.GetPath()
+                self.text.SaveFile(self.title)
             dialog.Destroy()
         else:
-            self.text.SaveFile(self.file)
+            self.text.SaveFile(self.fititlele)
 
     def OnSaveAs(self,event):
         dialog=wx.FileDialog(self,'wxpython notebook',style=wx.FD_SAVE)
         if dialog.ShowModal()==wx.ID_OK:
-            self.file=dialog.GetPath()
-            self.text.SaveFile(self.file)
+            self.title=dialog.GetPath()
+            self.text.SaveFile(self.title)
         dialog.Destroy()
 
     def OnAbout(self,event):
@@ -63,11 +64,12 @@ class TextPad(wx.Panel):
         self.text.AppendText(cont+'\r\n')
 
 class TextFrame(wx.Frame):    
-    def __init__(self, parent, title='ImagePy TexLog'):
-        wx.Frame.__init__(self, parent,title=title,size=(500,300))
+    def __init__(self, parent, title='no name', cont=''):
+        wx.Frame.__init__(self, parent, title=title, size=(500,300))
         self.title = title
-        self.textpad = TextPad(self)
+        self.textpad = TextPad(self, cont, title)
         self.append = self.textpad.append
+        self.append(cont)
         ### Create menus (name:event) k-v pairs 
         menus = [
                 ## File 
@@ -122,7 +124,7 @@ class TextNoteBook(wx.lib.agw.aui.AuiNotebook):
         
     def on_idle(self, event):
         for i in range(self.GetPageCount()):
-            title = self.GetPage(i).file
+            title = self.GetPage(i).title
             if self.GetPageText(i) != title:
                 self.SetPageText(i, title)
 
@@ -146,11 +148,11 @@ class TextNoteBook(wx.lib.agw.aui.AuiNotebook):
     def on_close(self, event): pass
 
 class TextNoteFrame(wx.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, title='TextPadBookFrame'):
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY,
-                            title = 'TextPadBookFrame',
+                            title = title,
                             pos = wx.DefaultPosition,
-                            size = wx.Size( 800, 600 ),
+                            size = wx.Size( 500, 500 ),
                             style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.notebook = TextNoteBook(self)

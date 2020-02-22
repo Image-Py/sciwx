@@ -1,7 +1,6 @@
 import wx, wx.lib.agw.aui as aui
 from .mcanvas import MCanvas
 from ..widgets import ToolBar, MenuBar
-from ..event import pubsub
 
 class CanvasFrame(wx.Frame):
     def __init__(self, parent=None, autofit=False):
@@ -24,9 +23,6 @@ class CanvasFrame(wx.Frame):
         self.set_img = self.canvas.set_img
         self.set_cn = self.canvas.set_cn
 
-        pubsub.publish('on_img_new', self.canvas.image)
-        pubsub.publish('on_wimg_new', self.canvas)
-
         self.Bind(wx.EVT_IDLE, self.on_idle)
         self.Bind(wx.EVT_ACTIVATE, self.on_valid)
         self.Bind(wx.EVT_CLOSE, self.on_close)
@@ -37,14 +33,9 @@ class CanvasFrame(wx.Frame):
 
     def set_title(self, ips): self.SetTitle(ips.title)
 
-    def on_valid(self, event): 
-        pubsub.publish('on_img_active', self.canvas.image)
-        pubsub.publish('on_wimg_active', self.canvas)
+    def on_valid(self, event): pass
 
     def on_close(self, event): 
-        pubsub.publish('on_img_remove', self.canvas.image)
-        pubsub.publish('on_wimg_remove', self.canvas)
-        self.Bind(wx.EVT_ACTIVATE, None)
         event.Skip()
 
     def add_toolbar(self):
@@ -82,20 +73,14 @@ class CanvasNoteBook(wx.lib.agw.aui.AuiNotebook):
     def add_canvas(self, mcanvas=None):
         if mcanvas is None: mcanvas = MCanvas(self)
         self.AddPage(mcanvas, 'Image', True, wx.NullBitmap )
-        pubsub.publish('on_img_new', mcanvas.image)
-        pubsub.publish('on_wimg_new', mcanvas)
         return mcanvas
 
     def set_title(self, panel, title):
         self.SetPageText(self.GetPageIndex(panel), title)
 
-    def on_valid(self, event): 
-        pubsub.publish('on_img_active', self.canvas().image)
-        pubsub.publish('on_wimg_active', self.canvas())
+    def on_valid(self, event): pass
 
-    def on_close(self, event): 
-        pubsub.publish('on_img_remove', self.canvas().image)
-        pubsub.publish('on_img_remove', self.canvas())
+    def on_close(self, event): pass
 
 class CanvasNoteFrame(wx.Frame):
     def __init__(self, parent):

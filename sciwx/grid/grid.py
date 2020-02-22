@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 from ..widgets import get_para
 
-
 class TableBase(wx.grid.GridTableBase):
     def __init__(self):
         wx.grid.GridTableBase.__init__(self)

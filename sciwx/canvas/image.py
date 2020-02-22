@@ -22,12 +22,14 @@ class Image:
     def img(self): return self.imgs[self.cur]
 
     @img.setter
-    def img(self, value): self.imgs[self.cur] = value
+    def img(self, value): 
+        self.imgs[self.cur] = value
+        self.cn = [0, (0,1,2)][self.channels==3]
 
     @property
     def channels(self):
-        if self.imgs[self.cur].ndim==2: return 1
-        else: return self.imgs[0].shape[2]
+        if self.img.ndim==2: return 1
+        else: return self.img.shape[2]
 
     @property
     def slices(self): return len(self.imgs)

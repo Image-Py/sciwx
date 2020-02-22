@@ -26,6 +26,7 @@ def publish(chan, *para):
     for i in triggers[chan]: i(*para)
 
 def add_default_sub():
+    for i in triggers.values(): del i[:]
     subscribe('on_img_new', ImageManager.add)
     subscribe('on_img_active', ImageManager.add)
     subscribe('on_img_remove', ImageManager.remove)

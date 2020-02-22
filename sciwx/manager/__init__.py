@@ -1,1 +1,0 @@
-from .imgmanager import ImageManager, WImageManager

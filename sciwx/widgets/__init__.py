@@ -7,3 +7,4 @@ from .normal import *
 from .toolbar import ToolBar
 from .menubar import MenuBar
 from .viewport import ViewPort
+from . import util

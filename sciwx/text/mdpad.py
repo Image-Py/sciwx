@@ -43,7 +43,7 @@ class MDFrame(wx.Frame):
     def __init__(self, parent, title='MarkDownFrame', cont='', url=''):
         wx.Frame.__init__ (self, parent, id = wx.ID_ANY, title = title, size = wx.Size(500,500))
         cont = '\n'.join([i.strip() for i in cont.split('\n')])
-        self.mdpad = MDPad(self, cont, url)
+        self.mdpad = MDPad(self, cont, url, title)
         self.set_cont, self.load_url = self.mdpad.set_cont, self.mdpad.load_url
         self.Bind( wx.EVT_IDLE, self.on_idle)
 
@@ -86,11 +86,11 @@ class MDNoteBook(wx.lib.agw.aui.AuiNotebook):
     def on_close(self, event): pass
 
 class MDNoteFrame(wx.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, title='MarkDownNoteFrame'):
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY,
-                            title = 'MarkDownNoteFrame',
+                            title = title,
                             pos = wx.DefaultPosition,
-                            size = wx.Size( 800, 600 ),
+                            size = wx.Size( 500,500),
                             style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
         sizer = wx.BoxSizer(wx.VERTICAL)
         self.notebook = MDNoteBook(self)
