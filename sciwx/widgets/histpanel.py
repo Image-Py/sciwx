@@ -51,7 +51,6 @@ class HistPanel(wx.Panel):
         # w, h = self.GetClientSize()
     
         # the main draw process 
-        print("drawing histogram")
            
         if not self.hist is None:
             dc.SetPen(wx.Pen((200,200,200), width=1, style=wx.SOLID)) 

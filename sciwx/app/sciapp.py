@@ -2,7 +2,7 @@ import wx, os, sys
 import time, threading
 
 import wx.lib.agw.aui as aui
-from sciwx.widgets import MenuBar, ToolBar
+from sciwx.widgets import MenuBar, ToolBar, ChoiceBook
 from sciwx.canvas import CanvasNoteBook
 from sciwx.grid import GridNoteBook
 from sciwx.text import MDNoteFrame, TextNoteFrame
@@ -23,8 +23,9 @@ class SciApp(wx.Frame, App):
         self.init_tool()
         self.init_canvas()
         self.init_table()
-        #self.load_menu(data)
+        self.init_widgets()
         self.init_text()
+        self.init_status()
 
         self.Layout()
         self.auimgr.Update()
@@ -34,8 +35,7 @@ class SciApp(wx.Frame, App):
         self.Bind(wx.EVT_CLOSE, self.on_close)
         self.Bind(aui.EVT_AUI_PANE_CLOSE, self.on_pan_close)
 
-
-    def add_status(self):
+    def init_status(self):
         self.stapanel = stapanel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         sizersta = wx.BoxSizer( wx.HORIZONTAL )
         self.txt_info = wx.StaticText( stapanel, wx.ID_ANY, "ImagePy  v0.2", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -57,6 +57,9 @@ class SciApp(wx.Frame, App):
         if not default is None: self.toolbar.add_pop('P', default)
         self.toolbar.Layout()
 
+    def load_widget(self, data):
+        self.widgets.load(data)
+        
     def init_menu(self):
         self.menubar = MenuBar(self)
         
@@ -93,6 +96,11 @@ class SciApp(wx.Frame, App):
         self.auimgr.AddPane( self.tablenbwrap, aui.AuiPaneInfo() .Bottom() .CaptionVisible( True ).PinButton( True ).Dock().Hide()
             .MaximizeButton( True ).Resizable().FloatingSize((800, 600)).BestSize(( 120,120 )). Caption('Tables') . 
             BottomDockable( True ).TopDockable( False ).LeftDockable( True ).RightDockable( True ) )
+
+    def init_widgets(self):
+        self.widgets = ChoiceBook(self)
+        self.auimgr.AddPane( self.widgets, aui.AuiPaneInfo() .Right().Caption('Widgets') .PinButton( True )
+            .Dock().Resizable().FloatingSize( wx.DefaultSize ).MinSize( wx.Size( 266,-1 ) ).Layer( 10 ) )
 
     def init_text(self):
         self.mdframe = MDNoteFrame(self, 'Sci Document')

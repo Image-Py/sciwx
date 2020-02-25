@@ -1,10 +1,10 @@
-from sciwx.event import ImgEvent, Tool, DefaultTool
+from sciwx.action import Tool
 from skimage.draw import line
 
 class Pencil(Tool):
     title = 'Pencil'
 
-    def __init__(self, app):
+    def __init__(self):
         self.status = False
         self.oldp = (0,0)
         

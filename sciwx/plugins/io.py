@@ -1,14 +1,14 @@
-from sciwx.event import SciEvent, ImgEvent
+from sciwx.action import SciAction, ImgAction
 from skimage.io import imread, imsave
 
-class Open(SciEvent):
+class Open(SciAction):
 	name = 'Open'
-	def start(self, para=None):
-		path = self.app.getpath('Open', ['png','bmp','jpg'], 'open')
+	def start(self, app, para=None):
+		path = app.getpath('Open', ['png','bmp','jpg'], 'open')
 		if path is None: return
-		self.app.show_img(imread(path))
+		app.show_img(imread(path))
 
-class Save(ImgEvent):
+class Save(ImgAction):
 	name = 'Save'
 	para = {'path':''}
 

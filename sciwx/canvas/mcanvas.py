@@ -36,7 +36,7 @@ class MCanvas(wx.Panel):
         self.Layout()
         self.sli_page.Bind(wx.EVT_SCROLL, self.on_scroll)
         self.sli_chan.Bind(wx.EVT_SCROLL, self.on_scroll)
-        # self.Bind(wx.EVT_IDLE, self.on_idle)
+        self.Bind(wx.EVT_IDLE, self.on_idle)
         
         #self.Fit()
         self.set_rg = self.canvas.set_rg
@@ -91,6 +91,10 @@ class MCanvas(wx.Panel):
             self.sli_chan.SetMax(channels-1)
             self.chans,self.cn = channels, self.canvas.image.cn
         
+    def on_idle(self, event):
+        if self.image.dirty: self.update()
+        self.image.dirty = False
+
     def update(self):
         if self.image.img is None: return
         self.slider()

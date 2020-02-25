@@ -1,13 +1,11 @@
-from .event import SciEvent
+from .action import SciAction
 from ..widgets import ParaDialog
 
-class ImgEvent(SciEvent):
-    title = 'Image Event'
+class ImgAction(SciAction):
+    title = 'Image Action'
     note, para, view = [], None, None
 
-    def __init__(self, app):
-        self.app = app
-        self.ips = app.get_img()
+    def __init__(self): pass
 
     def show(self):
         dialog = ParaDialog(self.app.get_img_win(), self.title)
@@ -27,12 +25,14 @@ class ImgEvent(SciEvent):
     def run(self, ips, img, snap, para):
         print('I am running!!!')
 
-    def start(self, para=None, callback=None):
-        print('Image Event Started!')
+    def start(self, app, para=None, callback=None):
+        print('Image Action Started!')
+        self.app = app
+        self.ips = app.get_img()
         if 'auto_snap' in self.note: self.ips.snapshot()
         if para!=None:
             self.run(self.ips, self.ips.img, self.ips.snap, para)
-        elif self.view==None and self.__class__.show is ImgEvent.show:
+        elif self.view==None and self.__class__.show is ImgAction.show:
             self.run(self.ips, self.ips.img, self.ips.snap, para)
         elif self.show():
             self.run(self.ips, self.ips.img, self.ips.snap, self.para)

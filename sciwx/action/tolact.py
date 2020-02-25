@@ -1,17 +1,20 @@
-from .event import SciEvent
+from .action import SciAction
 
-class Tool(SciEvent):
+class Tool(SciAction):
     title = 'Base Tool'
     default = None
     def mouse_down(self, image, x, y, btn, **key): pass
     def mouse_up(self, image, x, y, btn, **key): pass
     def mouse_move(self, image, x, y, btn, **key): pass
     def mouse_wheel(self, image, x, y, d, **key): pass
-    def start(self): Tool.default = self
+    def start(self, app): 
+        self.app = app
+        Tool.default = self
+        if not app is None: app.tool = self
 
 class DefaultTool(Tool):
     title = 'Move And Scale'
-    def __init__(self, app): 
+    def __init__(self): 
         self.oldxy = None
         
     def mouse_down(self, image, x, y, btn, **key):
@@ -31,4 +34,4 @@ class DefaultTool(Tool):
         if d>0: key['canvas'].zoomout(x, y, coord='data')
         if d<0: key['canvas'].zoomin(x, y, coord='data')
 
-DefaultTool(None).start()
+DefaultTool().start(None)

@@ -3,7 +3,7 @@ from .boxutil import cross, multiply, lay, mat
 from .imutil import mix_img
 from .mark import drawmark
 from .image import Image
-from ..event import Tool, DefaultTool
+from ..action import Tool, DefaultTool
 from time import time
 
 class Canvas (wx.Panel):
@@ -207,6 +207,7 @@ class Canvas (wx.Panel):
         mix_img(img, m, o, shp, self.outimg,
             self.outrgb, self.outint, self.image.rg, self.image.lut,
             self.image.log, cns=self.image.cn, mode=self.image.mode)
+        
         self.outbmp.CopyFromBuffer(memoryview(self.outrgb))
         dc.DrawBitmap(self.outbmp, *csbox[:2])
         

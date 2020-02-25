@@ -6,7 +6,7 @@ class ViewPort(wx.Panel):
     """ HistCanvas: diverid from wx.core.Panel """
     def __init__(self, parent):
         wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, 
-                            pos = wx.DefaultPosition, size = wx.Size(300,300), 
+                            pos = wx.DefaultPosition, size = wx.Size(100,100), 
                             style = wx.TAB_TRAVERSAL )
         self.img = None
         self.boximg = None
@@ -45,7 +45,7 @@ class ViewPort(wx.Panel):
         wx.BufferedPaintDC(self, self.buffer)
 
     def on_ld(self, event):
-        self.on_view(self.GetValue())
+        self.on_view(self.GetValue(), True)
         x, y = event.GetX(), event.GetY()
         x = 1.0*(x-self.offx)/self.imgw
         y = 1.0*(y-self.offy)/self.imgh
@@ -69,7 +69,6 @@ class ViewPort(wx.Panel):
 
     def set_img(self, img, size):
         self.ibox = size[:2][::-1]
-        print(size, self.ibox, self.box)
         bmp = wx.Bitmap.FromBuffer(img.shape[1], img.shape[0], memoryview(img.copy()))
         if 1.0*self.box[0]/self.box[1]<1.0*self.ibox[0]/self.ibox[1]:
             k = 1.0*self.box[0]/self.ibox[0]
@@ -114,7 +113,7 @@ class ViewPort(wx.Panel):
         
     def on_view(self, event): print(event)
     
-    def Bind(self, f):self.on_view = f
+    def Bind(self, tag, f): self.on_view = f
 
 if __name__ == '__main__':
     app = wx.App()

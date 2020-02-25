@@ -30,9 +30,22 @@ class ToolBar(wx.Panel):
         self.SetSizer( sizer )
         self.app = parent
         self.toolset = []
+        self.curbtn = None
+
+    def on_tool(self, evt, tol):
+        tol().start(self.app)
+        evt.Skip()
+        btn = evt.GetEventObject()
+        print(self.GetBackgroundColour())
+        print(btn.GetClassDefaultAttributes().colFg)
+        if not self.curbtn is None:
+            self.curbtn.SetBackgroundColour(self.GetBackgroundColour())
+        self.curbtn = btn
+        btn.SetBackgroundColour(wx.SystemSettings.GetColour( wx.SYS_COLOUR_ACTIVECAPTION ) )
 
     def bind(self, btn, tol):
-        btn.Bind( wx.EVT_LEFT_DOWN, lambda x, obj=tol: obj(self.app).start())
+        btn.SetBackgroundColour(self.GetBackgroundColour())
+        btn.Bind( wx.EVT_LEFT_DOWN, lambda e, obj=tol: self.on_tool(e, obj))
             
     def add_tool(self, logo, tool):
         btn = wx.BitmapButton(self, wx.ID_ANY, make_logo(self, logo), 

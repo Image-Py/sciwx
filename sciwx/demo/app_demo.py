@@ -2,7 +2,11 @@ import wx, sys
 sys.path.append('../../')
 from sciwx.app import SciApp
 from sciwx.canvas import CanvasFrame
-from sciwx.event import ImgEvent, Tool, DefaultTool
+from sciwx.action import ImgAction, Tool, DefaultTool
+from sciwx.plugins.curve import Curve
+from sciwx.plugins.channels import Channels
+from sciwx.plugins.histogram import Histogram
+from sciwx.plugins.viewport import ViewPort
 
 from sciwx.plugins.filters import Gaussian, Undo
 from sciwx.plugins.pencil import Pencil
@@ -13,7 +17,8 @@ if __name__ == '__main__':
     
     app = wx.App(False)
     frame = SciApp(None)
-    frame.Show()
+    
+    logo = 'C:/Users/54631/Documents/projects/imagepy/imagepy/tools/Standard/magic.gif'
     frame.load_menu(('menu',[('File',[('Open', Open),
                                       ('Save', Save)]),
                              ('Filters', [('Gaussian', Gaussian),
@@ -22,6 +27,12 @@ if __name__ == '__main__':
                                             ('D', DefaultTool)]),
                               ('draw', [('X', Pencil),
                                         ('X', Pencil)])]), 'draw')
+    frame.load_widget(('widgets', [('Histogram', [('Histogram', Histogram),
+                                                  ('Curve', Curve),
+                                                  ('Channels', Channels)]),
+                                   ('Navigator', [('Viewport', ViewPort)])]))
+    
     frame.show_img(camera())
     frame.show_img(camera())
+    frame.Show()
     app.MainLoop()
