@@ -2,7 +2,7 @@ import sys, wx
 sys.path.append('../../')
 from skimage.draw import line
 from sciwx.canvas import CanvasFrame
-from sciwx.event import Tool, DefaultTool
+from sciwx.action import Tool, DefaultTool
 
 from skimage.morphology import flood_fill, flood
 from skimage.draw import line, circle
@@ -54,7 +54,7 @@ if __name__=='__main__':
     cf.set_imgs([astronaut(), 255-astronaut()])
     cf.set_cn((0,1,2))
     bar = cf.add_toolbar()
-    bar.add_tool(DefaultTool, 'M')
-    bar.add_tool(AIPen, 'A')
+    bar.add_tool('M', DefaultTool)
+    bar.add_tool('A', AIPen)
     cf.Show()
     app.MainLoop()
