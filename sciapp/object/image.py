@@ -43,9 +43,11 @@ def histogram(imgs, rg=(0,256), slices='all', chans='all', step=1):
     return np.sum(hist, axis=0)
 
 class Image:
-    def __init__(self, img=None):
-        self.name = 'Image'
-        self.imgs = [img]
+    def __init__(self, imgs=None, name='Image'):
+        self.name = name
+        self.set_imgs(imgs)
+        self.roi = None
+        self.pos = (0,0)
         self.cn = 0
         self.rg = (0,255)
         self.lut = default_lut
@@ -54,7 +56,13 @@ class Image:
         self.cur = 0
         self.dirty = False
         self.snap = None
+        self.back = None
 
+    @property
+    def box(self):
+        (x, y), (h, w) = self.pos, self.shape
+        return [x, y, x+w, y+h]
+    
     @property
     def title(self): return self.name
     
@@ -64,11 +72,11 @@ class Image:
     @img.setter
     def img(self, value): 
         self.imgs[self.cur] = value
-        self.cn = [0, (0,1,2)][self.channels==3]
-        if self.dtype == np.uint8:
-            self.rg = [(0, 255)] * self.channels
-        else: 
-            self.rg = self.get_updown('all', 'all', step=512)
+        self.reset()
+        
+    def set_imgs(self, imgs):
+        self.imgs = imgs or [imgs]
+        if not imgs is None: self.reset()
 
     @property
     def channels(self):
@@ -103,6 +111,14 @@ class Image:
         self.rg = [value] * len(self.rg)
 
     def update(self): self.dirty = True
+
+    def reset(self):
+        self.cn = [0, (0,1,2)][self.channels==3]
+        print(self.cn)
+        if self.dtype == np.uint8:
+            self.rg = [(0, 255)] * self.channels
+        else: 
+            self.rg = self.get_updown('all', 'all', step=512)
 
     def snapshot(self):
         if self.snap is None:

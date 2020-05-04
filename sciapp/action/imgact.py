@@ -1,5 +1,4 @@
 from .action import SciAction
-from ..widgets import ParaDialog
 
 class ImgAction(SciAction):
     title = 'Image Action'
@@ -8,15 +7,11 @@ class ImgAction(SciAction):
     def __init__(self): pass
 
     def show(self):
-        dialog = ParaDialog(self.app.get_img_win(), self.title)
-        dialog.init_view(self.view, self.para, 'preview' in self.note, modal=True)
         ips, img, snap = self.ips, self.ips.img, self.ips.snap
         f = lambda p: self.run(ips, img, snap, p) or self.ips.update()
-        dialog.Bind('cancel', lambda x=self.ips:self.cancel(x))
-        dialog.Bind('parameter', f)
-        status = dialog.ShowModal()==5100
-        dialog.Destroy()
-        return status
+        return self.app.show_para(self.title, self.view, self.para, f, on_ok=None, 
+            on_cancel=lambda x=self.ips:self.cancel(x), 
+            preview='preview' in self.note, modal=True)
 
     def cancel(self, ips):
         ips.img[:] = ips.snap

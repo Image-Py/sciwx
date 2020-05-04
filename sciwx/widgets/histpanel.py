@@ -3,19 +3,20 @@ import numpy as np
 
 class HistPanel(wx.Panel):
     """ HistCanvas: diverid from wx.core.Panel """
-    def __init__(self, parent, hist=None):
+    def __init__(self, parent, hist=None, size=(256, 80)):
         wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, 
-                            pos = wx.DefaultPosition, size = wx.Size(256,81), 
+                            pos = wx.DefaultPosition, size = (size[0], size[1]+1), 
                             style = wx.TAB_TRAVERSAL )
         self.init_buf()
         self.hist = None
+        self.w, self.h = size
         if not hist is None: self.SetValue(hist)
         self.dirty = False
-        self.x1, self.x2 = 0, 255
+        self.x1, self.x2 = 0, self.w-1
         self.Bind(wx.EVT_SIZE, self.on_size)  
         self.Bind(wx.EVT_IDLE, self.on_idle)
         self.Bind(wx.EVT_PAINT, self.on_paint)
-        self.Bind = lambda z, x:0 
+        # self.Bind = lambda z, x:0 
 
     def update(self): self.dirty = True
 
@@ -36,8 +37,8 @@ class HistPanel(wx.Panel):
         wx.BufferedPaintDC(self, self.buffer)
         
     def SetValue(self, hist):
-        self.hist = (hist*80.0/hist.max())
-        self.logh = (np.log(self.hist+1.0))*(80/(np.log(81)))
+        self.hist = (hist*self.h/hist.max())
+        self.logh = (np.log(self.hist+1.0))*(self.h/(np.log(self.h+1)))
         self.update()
         
     def set_lim(self, x1, x2):
@@ -53,15 +54,16 @@ class HistPanel(wx.Panel):
         # the main draw process 
            
         if not self.hist is None:
+            hist = self.hist[np.linspace(0, len(self.hist)-1, self.w, dtype=np.int16)]
             dc.SetPen(wx.Pen((200,200,200), width=1, style=wx.SOLID)) 
-            for i in range(256):
-                dc.DrawLine(i,80,i,80-self.logh[i])
+            for i in range(self.w):
+                dc.DrawLine(i,self.h,i,self.h-self.logh[i])
             dc.SetPen(wx.Pen((100,100,100), width=1, style=wx.SOLID)) 
-            for i in range(256):
-                dc.DrawLine(i,80,i,80-self.hist[i])            
+            for i in range(self.w):
+                dc.DrawLine(i,self.h,i,self.h-self.hist[i])            
         dc.SetPen(wx.Pen((0,0,0), width=1, style=wx.SOLID))
-        dc.DrawLine(self.x1, 80, self.x2, 0)
-        dc.DrawLines([(0,0),(255,0),(255,80),(0,80),(0,0)])
+        dc.DrawLine(self.x1, self.h, self.x2, 0)
+        dc.DrawLines([(0,0),(self.w-1,0),(self.w-1,self.h),(0,self.h),(0,0)])
 
 if __name__ == '__main__':
     app = wx.App()

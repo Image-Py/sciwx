@@ -3,7 +3,8 @@ sys.path.append('../../')
 import pandas as pd
 import numpy as np
 
-from sciwx.grid import Grid, Table
+from sciwx.grid import Grid
+from sciapp.object import Table
 from sciwx.grid import GridFrame, GridNoteBook, GridNoteFrame
 
 def grid_test():

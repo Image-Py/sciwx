@@ -26,7 +26,7 @@ class ParaDialog (wx.Dialog):
         if state=='ok' and self.on_ok:self.on_ok()
         if state=='cancel' and self.on_cancel:self.on_cancel()
 
-    def add_confirm(self, modal=True):
+    def add_confirm(self, modal):
         sizer = wx.BoxSizer( wx.HORIZONTAL )
         self.btn_ok = wx.Button( self, wx.ID_OK, 'OK', wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
         sizer.Add( self.btn_ok, 0, wx.ALIGN_RIGHT|wx.ALL, 5 )
@@ -45,7 +45,7 @@ class ParaDialog (wx.Dialog):
         #self.lst.Add()
 
     def init_view(self, items, para, preview=False, modal = True):
-        self.para = para
+        self.para, self.modal = para, modal
         for item in items:
             self.add_ctrl_(widgets[item[0]], item[1], item[2:])
         if preview:self.add_ctrl_(Check, 'preview', ('preview',))
@@ -119,6 +119,14 @@ class ParaDialog (wx.Dialog):
         if tag == 'parameter': self.handle = f if not f is None else print
         if tag == 'commit': self.on_ok = f
         if tag == 'cancel': self.on_cancel = f
+
+    def show(self):
+        if self.modal: 
+            status =  self.ShowModal() == 5100
+            self.Destroy()
+            return status
+        else: self.Show()
+
 
     def __del__( self ):
         print('panel config deleted!')

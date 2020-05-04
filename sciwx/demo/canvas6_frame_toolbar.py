@@ -2,9 +2,9 @@ import sys, wx
 sys.path.append('../../')
 from skimage.draw import line
 from sciwx.canvas import CanvasFrame
-from sciwx.event import Tool, DefaultTool
+from sciapp.action import Tool, ImageTool
 
-class Pencil(Tool):
+class Pencil(ImageTool):
     title = 'Pencil'
         
     def __init__(self):
@@ -39,7 +39,7 @@ if __name__=='__main__':
     cf.set_imgs([astronaut(), 255-astronaut()])
     cf.set_cn((0,1,2))
     bar = cf.add_toolbar()
-    bar.add_tool(DefaultTool, 'M')
-    bar.add_tool(Pencil, 'P')
+    bar.add_tool('M', ImageTool)
+    bar.add_tool('P', Pencil)
     cf.Show()
     app.MainLoop()

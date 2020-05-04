@@ -1,4 +1,4 @@
-from .table import Table
+from sciapp.object import Table
 import wx, os
 import wx.grid
 import sys

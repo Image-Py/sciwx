@@ -1,4 +1,4 @@
-from sciwx.action import Tool
+from sciapp.action import Tool
 from skimage.draw import line
 
 class Pencil(Tool):

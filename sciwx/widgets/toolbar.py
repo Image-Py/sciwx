@@ -1,8 +1,10 @@
 import wx
 
 def make_logo(cont, obj):
+    print(obj)
     if isinstance(obj, str) and len(obj)>1:
         bmp = wx.Bitmap(obj)
+        return bmp
     if isinstance(obj, str) and len(obj)==1:
         bmp = wx.Bitmap.FromRGBA(16, 16)
         dc = wx.BufferedDC(wx.ClientDC(cont), bmp)
@@ -57,7 +59,7 @@ class ToolBar(wx.Panel):
         if not fixed: self.toolset.append((name, []))
         for logo, tool in tools:
             btn = wx.BitmapButton(self, wx.ID_ANY, make_logo(self, logo), 
-                wx.DefaultPosition, (32,32), wx.BU_AUTODRAW|wx.RAISED_BORDER )
+                wx.DefaultPosition, (64,64), wx.BU_AUTODRAW|wx.RAISED_BORDER )
             self.bind(btn, tool)
             self.GetSizer().Add(btn, 0, wx.ALL, 1)
             if not fixed: self.toolset[-1][1].append(btn)
@@ -76,7 +78,7 @@ class ToolBar(wx.Panel):
     def add_pop(self, logo, default):
         self.GetSizer().AddStretchSpacer(1)
         btn = wx.BitmapButton(self, wx.ID_ANY, make_logo(self, logo), 
-                wx.DefaultPosition, (32,32), wx.BU_AUTODRAW|wx.RAISED_BORDER )
+                wx.DefaultPosition, (64, 64), wx.BU_AUTODRAW|wx.RAISED_BORDER )
         btn.Bind(wx.EVT_LEFT_DOWN, self.menu_drop)
         self.GetSizer().Add(btn, 0, wx.ALL, 1)
         self.active_set(default)
@@ -96,7 +98,8 @@ if __name__ == '__main__':
     app = wx.App()
     frame = wx.Frame(None)
     tool = ToolBar(frame)
-    tool.add_tools('A', [('A', None)] * 3)
+    path = 'C:/Users/54631/Documents/projects/imagepy2/fucai/imgs/_help.png'
+    tool.add_tools('A', [(path, None)] * 3)
     tool.add_tools('B', [('B', None)] * 3)
     tool.add_tools('C', [('C', None)] * 3)
     tool.add_pop('P', 'B')

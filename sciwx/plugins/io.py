@@ -1,4 +1,4 @@
-from sciwx.action import SciAction, ImgAction
+from sciapp.action import SciAction, ImgAction
 from skimage.io import imread, imsave
 
 class Open(SciAction):

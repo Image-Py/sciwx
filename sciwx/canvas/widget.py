@@ -1,9 +1,11 @@
 import wx, wx.lib.agw.aui as aui
 from .mcanvas import MCanvas
 from ..widgets import ToolBar, MenuBar
+from sciapp import App
 
-class CanvasFrame(wx.Frame):
+class CanvasFrame(wx.Frame, App):
     def __init__(self, parent=None, autofit=False):
+        App.__init__(self)
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY,
                             title = 'CanvasFrame',
                             pos = wx.DefaultPosition,
@@ -82,8 +84,9 @@ class CanvasNoteBook(wx.lib.agw.aui.AuiNotebook):
 
     def on_close(self, event): pass
 
-class CanvasNoteFrame(wx.Frame):
+class CanvasNoteFrame(wx.Frame, App):
     def __init__(self, parent):
+        App.__init__(self)
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY,
                             title = 'CanvasNoteFrame',
                             pos = wx.DefaultPosition,

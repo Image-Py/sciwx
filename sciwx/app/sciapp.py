@@ -2,7 +2,7 @@ import wx, os, sys
 import time, threading
 
 import wx.lib.agw.aui as aui
-from sciwx.widgets import MenuBar, ToolBar, ChoiceBook
+from sciwx.widgets import MenuBar, ToolBar, ChoiceBook, ParaDialog
 from sciwx.canvas import CanvasNoteBook
 from sciwx.grid import GridNoteBook
 from sciwx.text import MDNoteFrame, TextNoteFrame
@@ -121,8 +121,8 @@ class SciApp(wx.Frame, App):
         self.remove_img_win(canvas)
         self.remove_img(canvas.image)
         
-    def set_info(self, value):
-        self.txt_info.SetLabel(value)
+    def info(self, value):
+        wx.CallAfter(self.txt_info.SetLabel, value)
 
     def set_progress(self, value):
         v = max(min(value, 100), 0)
@@ -179,6 +179,13 @@ class SciApp(wx.Frame, App):
         path = dialog.GetPath() if rst == wx.ID_OK else None
         dialog.Destroy()
         return path
+
+    def show_para(self, title, view, para, on_handle, on_ok=None, on_cancel=None, preview=False, modal=True):
+        dialog = ParaDialog(self, title)
+        dialog.init_view(view, para, preview, modal=True)
+        dialog.Bind('cancel', on_cancel)
+        dialog.Bind('parameter', on_handle)
+        return dialog.show()
 
 class P:
     def __init__(self, name):

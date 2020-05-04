@@ -1,4 +1,4 @@
-from sciwx.action import ImgAction
+from sciapp.action import ImgAction
 from scipy.ndimage import gaussian_filter
 
 class Gaussian(ImgAction):

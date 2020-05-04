@@ -4,7 +4,7 @@ try: from numba import njit as jit
 except:
     print('install numba may be several times faster!')
     jit = None
-#jit = None
+# jit = None
     
 def affine_jit(img, m, offset, output_shape=0, output=0, order=0, prefilter=0):
     kr=m[0]; kc=m[1]; ofr=offset[0]; ofc=offset[1];
@@ -202,7 +202,8 @@ def mix_img(img, m, o, shp, buf, rgb, byt, rg=(0,255), lut=None, log=True, cns=0
             affine_transform(img[:,:,0].real, m, o, shp, buf.real, 0, prefilter=False)
             affine_transform(img[:,:,0].imag, m, o, shp, buf.imag, 0, prefilter=False)
             buf = complex_norm(buf, buf.real, buf.imag, buf.real)
-        else: affine_transform(img[:,:,cns], m, o, shp, buf, 0, prefilter=False)
+        else: 
+            affine_transform(img[:,:,cns], m, o, shp, buf, 0, prefilter=False)
         stretch(buf, byt, rg[cns], log)
         return lookup(byt, lut, rgb, mode)
     for i,v in enumerate(cns):

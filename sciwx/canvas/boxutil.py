@@ -6,6 +6,12 @@ def cross(winbox, conbox):
     x2, y2 = two[:,2:].min(axis=0)
     return [x1, y1, x2, y2]
 
+def merge(winbox, conbox):
+    two = np.array([winbox, conbox])
+    x1, y1 = two[:,:2].min(axis=0)
+    x2, y2 = two[:,2:].max(axis=0)
+    return [x1, y1, x2, y2]
+
 def multiply(rect, kx, ky):
     return rect * [kx, ky, kx, ky]
 
@@ -41,9 +47,17 @@ def lay(winbox, conbox):
     layx(winbox, conbox)
     layy(winbox, conbox)
 
-def mat(ori, vir, cros):
-    kx = (ori[2]-ori[0])/(vir[2]-vir[0])
-    ky = (ori[3]-ori[1])/(vir[3]-vir[1])
-    ox = (cros[1]-vir[1])*ky
-    oy = (cros[0]-vir[0])*kx
+def like(ori, cont, cell):
+    kx = (cont[2]-cont[0])/(ori[2]-ori[0])
+    ky = (cont[3]-cont[1])/(ori[3]-ori[1])
+    ox = cont[0] - ori[0]*kx
+    oy = cont[1] - ori[1]*kx
+    return [cell[0]*kx+ox, cell[1]*ky+oy, 
+        cell[2]*kx+ox, cell[3]*kx+oy]
+
+def mat(ori, con, cell, cros):
+    kx = (ori[2]-ori[0])/(con[2]-con[0])
+    ky = (ori[3]-ori[1])/(con[3]-con[1])
+    ox = (cros[1]-cell[1])*ky
+    oy = (cros[0]-cell[0])*kx
     return (ox, oy), (kx, ky)

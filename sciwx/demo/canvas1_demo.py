@@ -2,12 +2,13 @@ import sys
 sys.path.append('../../')
 from skimage.data import astronaut, camera
 from numpy.fft import fft2, fftshift
-from sciwx.canvas import Canvas
+from sciwx.canvas import Canvas as Canvas
+from sciapp.object import Image
 import wx
 
 def gray_test():
     frame = wx.Frame(None, title='gray test')
-    canvas = Canvas(frame, autofit=True)
+    canvas = Canvas(frame, autofit=False)
     canvas.set_img(camera())
     frame.Show()
 
@@ -38,8 +39,21 @@ def complex_test():
 
 if __name__ == '__main__':
     app = wx.App()
-    gray_test()
-    rgb_test()
-    rgb_gray_blend()
-    complex_test()
+    #gray_test()
+    #rgb_test()
+    #rgb_gray_blend()
+    #complex_test()
+    frame = wx.Frame(None, title='blend')
+    canvas = Canvas(frame, autofit=True)
+    image = Image()
+    image.img = camera()
+    image.pos = (0,0)
+    canvas.images.append(image)
+
+    image = Image()
+    image.img = astronaut()
+    image.pos = (100,200)
+    image.cn = (0,1,2)
+    canvas.images.append(image)
+    frame.Show()
     app.MainLoop()

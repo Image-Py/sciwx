@@ -2,7 +2,7 @@ import sys, wx
 sys.path.append('../../')
 from skimage.draw import line
 from sciwx.canvas import CanvasFrame
-from sciwx.event import Tool, DefaultTool
+from sciapp.action import Tool, DefaultTool
 
 from skimage.morphology import flood_fill, flood
 from skimage.draw import line, circle

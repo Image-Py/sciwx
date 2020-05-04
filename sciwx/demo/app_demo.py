@@ -2,7 +2,7 @@ import wx, sys
 sys.path.append('../../')
 from sciwx.app import SciApp
 from sciwx.canvas import CanvasFrame
-from sciwx.action import ImgAction, Tool, DefaultTool
+from sciapp.action import ImgAction, Tool, DefaultTool
 from sciwx.plugins.curve import Curve
 from sciwx.plugins.channels import Channels
 from sciwx.plugins.histogram import Histogram
