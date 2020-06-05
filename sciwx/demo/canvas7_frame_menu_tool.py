@@ -3,9 +3,9 @@ sys.path.append('../../')
 from scipy.ndimage import gaussian_filter
 from skimage.draw import line
 from sciwx.canvas import CanvasFrame
-from sciwx.event import ImgEvent, Tool, DefaultTool
-
-class Gaussian(ImgEvent):
+# from sciwx.event import ImgEvent, Tool, DefaultTool
+from sciapp.action import ImgAction, Tool, DefaultTool
+class Gaussian(ImgAction):
     title = 'Gaussian'
     note = ['auto_snap', 'preview']
     para = {'sigma':2}
@@ -14,7 +14,7 @@ class Gaussian(ImgEvent):
     def run(self, ips, img, snap, para):
         gaussian_filter(snap, para['sigma'], output=img)
 
-class Undo(ImgEvent):
+class Undo(ImgAction):
     title = 'Undo'
     def run(self, ips, img, snap, para): ips.swap()
 
@@ -57,7 +57,7 @@ if __name__=='__main__':
                                  ('Unto', Undo)]),]))
     
     bar = cf.add_toolbar()
-    bar.add_tool(DefaultTool, 'M')
-    bar.add_tool(Pencil, 'P')
+    bar.add_tool('M', DefaultTool)
+    bar.add_tool('P', Pencil)
     cf.Show()
     app.MainLoop()

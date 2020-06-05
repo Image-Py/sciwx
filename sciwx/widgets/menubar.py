@@ -51,7 +51,7 @@ if __name__ == '__main__':
     
     app = wx.App()
     frame = wx.Frame(None)
-    menubar = MenuBar()
+    menubar = MenuBar(frame)
     menubar.load(data)
     frame.SetMenuBar(menubar)
     frame.Show()
