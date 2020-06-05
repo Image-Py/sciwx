@@ -7,7 +7,7 @@ from sciwx.canvas import CanvasNoteBook
 from sciwx.grid import GridNoteBook
 from sciwx.text import MDNoteFrame, TextNoteFrame
 from skimage.data import camera
-from sciwx.app.manager import App
+from sciapp.app import App
 
 class SciApp(wx.Frame, App):
     def __init__( self, parent ):

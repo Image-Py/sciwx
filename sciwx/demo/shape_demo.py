@@ -1,7 +1,9 @@
 import sys
 sys.path.append('../../')
 from sciapp.object import mark2shp, Layer, json2shp
-from sciapp.action import ShapeEditor, PointEditor, LineEditor, PolygonEditor, \
+# from sciapp.action import ShapeEditor
+from sciapp.action import BaseEditor
+from sciapp.action import PointEditor, LineEditor, PolygonEditor, \
 RectangleEditor, EllipseEditor, FreeLineEditor, FreePolygonEditor, BaseEditor
 from sciwx.canvas import VCanvas as Canvas
 import wx
@@ -36,7 +38,7 @@ def mark_test(mark):
 
 if __name__ == '__main__':
     app = wx.App()
-    ShapeEditor(dtype={'layer', 'rectangles'}).start(None)
+    BaseEditor(dtype={'layer', 'rectangles'}).start(None)
     FreePolygonEditor().start(None)
     #mark_test(point)
     #mark_test(points)

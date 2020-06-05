@@ -2,9 +2,9 @@ import sys, wx
 sys.path.append('../../')
 from scipy.ndimage import gaussian_filter
 from sciwx.canvas import CanvasFrame
-from sciwx.event import ImgEvent
-
-class Gaussian(ImgEvent):
+# from sciwx.event import ImgEvent
+from sciapp.action import ImgAction
+class Gaussian(ImgAction):
     title = 'Gaussian'
     note = ['auto_snap', 'preview']
     para = {'sigma':2}
@@ -13,7 +13,7 @@ class Gaussian(ImgEvent):
     def run(self, ips, img, snap, para):
         gaussian_filter(snap, para['sigma'], output=img)
 
-class Undo(ImgEvent):
+class Undo(ImgAction):
     title = 'Undo'
     def run(self, ips, img, snap, para):
         print(ips.img.mean(), ips.snap.mean())
