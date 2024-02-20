@@ -1,5 +1,6 @@
-from .tolact import ShapeTool
+from ..tolact import ShapeTool
 from sciapp.object import *
+from sciapp.util import geom_union
 from numpy.linalg import norm
 import numpy as np
 
@@ -64,7 +65,6 @@ def pick_obj(shp, x, y, lim, types='all'):
 		d = shp.to_geom().distance(Point([x, y]).to_geom())
 		if d<minl: obj, minl = shp, d
 	return obj, minl
-
 
 def pick_point(shp, x, y, lim, types='all'):
 	m, obj, minl = None, None, lim
@@ -239,7 +239,7 @@ class BaseEditor(ShapeTool):
 				else: shp.body.remove(obj)
 				shp.dirty = True
 			if key['shift'] and not key['alt'] and not key['ctrl']:
-				layer = geom2shp(union(shp.to_geom()))
+				layer = geom2shp(geom_union(shp.to_geom()))
 				shp.body = layer.body
 				shp.dirty = True
 			if not (key['shift'] or key['alt'] or key['ctrl']):
@@ -292,7 +292,7 @@ class BaseEditor(ShapeTool):
 				pts = np.vstack(pts)
 				key['canvas'].marks['anchor'] = Points(pts, color=(255,0,0))
 			self.p = x, y
-			self.pick_m.dirty =shp.dirty = True
+			self.pick_m.dirty = shp.dirty = True
 
 	def mouse_wheel(self, shp, x, y, d, **key):
 		if d>0: key['canvas'].zoomout(x, y, coord='data')

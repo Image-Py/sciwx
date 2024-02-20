@@ -1,8 +1,9 @@
 from ..widgets import HistPanel, CMapPanel, FloatSlider, CMapSelCtrl
 import wx, numpy as np
+from sciapp import Source
 
 class Histogram( wx.Panel ):
-	title = 'Histogram'
+	title = 'Histogram Widget'
 
 	def __init__( self, parent, app):
 		wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( 255,0 ), style = wx.TAB_TRAVERSAL )
@@ -52,15 +53,7 @@ class Histogram( wx.Panel ):
 		bSizer1.Add( bSizer2, 0, wx.EXPAND |wx.ALL, 5 )
 
 		self.cmapsel = CMapSelCtrl(self)
-		import matplotlib.pyplot as plt
-		self.luts = {}
-		for i in plt.colormaps():
-			cm = plt.get_cmap(i)
-			if i[-2:]=='_r': continue
-			vs = np.linspace(0, cm.N, 256, endpoint=False)
-			self.luts[i] = cm(vs.astype(np.int), bytes=True)[:,:3]
-		self.luts['Grays'] = self.luts.pop('gray')
-		self.cmapsel.SetItems(self.luts)
+		
 		bSizer1.Add(self.cmapsel, 0, wx.ALL|wx.EXPAND, 5 )
 
 		self.cmap = CMapPanel(self)
@@ -91,8 +84,8 @@ class Histogram( wx.Panel ):
 	def on_cmapsel(self, event):
 		ips = self.app.get_img()
 		if ips is None: return
-		key = self.cmapsel.GetValue()
-		ips.lut = self.luts[key]
+		key = self.cmapsel.GetSelection()
+		ips.lut = self.cmapsel.vs[key]
 		ips.update()
 	
 	# Virtual event handlers, overide them in your derived class
@@ -124,7 +117,7 @@ class Histogram( wx.Panel ):
 		ips = self.app.get_img()
 		if ips is None: return
 		self.range = ips.range = (0,255)
-		hist = ips.histogram()
+		hist = ips.histogram(step=1024)
 		self.histpan.SetValue(hist)
 		self.sli_low.set_para((0,255), 0)
 		self.sli_high.set_para((0,255), 0)
@@ -136,9 +129,9 @@ class Histogram( wx.Panel ):
 	def on_minmax( self, event ):
 		ips = self.app.get_img()
 		if ips is None: return
-		minv, maxv = ips.get_updown()
+		minv, maxv = ips.get_updown()[0]
 		self.range = ips.range = (minv, maxv)
-		hist = ips.histogram()
+		hist = ips.histogram(step=1024)
 		self.histpan.SetValue(hist)
 		self.sli_low.set_para(self.range, 10)
 		self.sli_high.set_para(self.range, 10)
@@ -150,7 +143,7 @@ class Histogram( wx.Panel ):
 	def on_slice( self, event ):
 		ips = self.app.get_img()
 		if ips is None: return
-		hist = ips.histogram()
+		hist = ips.histogram(step=1024)
 		self.histpan.SetValue(hist)
 	
 	def on_stack( self, event ):

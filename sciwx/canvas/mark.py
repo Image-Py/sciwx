@@ -1,5 +1,6 @@
 import numpy as np
 from math import sin, cos
+from sciapp import Source
 
 point = {'type':'point', 'color':(255,0,0), 'lw':1, 'body':(10,10)}
 points = {'type':'points', 'color':(255,0,0), 'lw':1, 'body':[(10,10),(100,200)]}
@@ -74,7 +75,7 @@ def plot(pts, dc, f, **key):
 		r = 2
 		x, y = pts.body.T[:2]
 		xy = np.vstack(f(x, y)).T
-		lst = np.hstack((xy-r, np.ones((len(x),2))*(r*2)))
+		lst = np.hstack((xy-r, np.ones((len(x),2), dtype=np.int32)*(r*2)))
 		isline = pts.lstyle and '-' in pts.lstyle
 		ispoint = pts.lstyle and 'o' in pts.lstyle
 		if pts.dtype == 'polygon':
@@ -159,12 +160,12 @@ def draw_circle(pts, dc, f, **key):
 	if pts.dtype == 'circle':
 		x, y ,r = pts.body
 		x, y =  f(x, y)
-		dc.DrawCircle(x, y, r*key['k'])
+		dc.DrawCircle(x, y, int(r*key['k']+0.5))
 	if pts.dtype == 'circles':
 		lst = []
 		x, y, r = pts.body.T
 		x, y = f(x, y)
-		r = r * key['k']
+		r = (r * key['k'] + 0.5).astype(np.int32)
 		lst = np.vstack([x-r, y-r, r*2, r*2]).T
 		dc.DrawEllipseList(lst)
 
@@ -237,15 +238,15 @@ def draw_rectangle(pts, dc, f, **key):
 
 	if pts.dtype == 'rectangle':
 		x, y, w, h = pts.body
+		w, h = f(x+w, y+h)
 		x, y = f(x, y)
-		w, h = w*key['k'], h*key['k']
-		dc.DrawRectangle(x.round(), (y-h).round(), 
-			w.round(), h.round())
+		dc.DrawRectangle(x.round(), (y).round(), 
+			(w-x).round(), (h-y).round())
 	if pts.dtype == 'rectangles':
 		x, y, w, h = pts.body.T
+		w, h = f(x+w, y+h)
 		x, y = f(x, y)
-		w, h = w*key['k'], h*key['k']
-		lst = np.vstack((x,y-h,w,h)).T
+		lst = np.vstack((x,y,w-x,h-y)).T
 		dc.DrawRectangleList(lst.round())
 
 	pen.SetWidth(width)
@@ -262,16 +263,19 @@ def draw_text(pts, dc, f, **key):
 	size  = font.GetPointSize()
 	tcolor = dc.GetTextForeground()
 	bcolor = dc.GetTextBackground()
-	
+	dc.SetTextForeground(color)
+	dc.SetTextBackground(fcolor)
 	if not pts.color is None: 
 		pen.SetColour(pts.color)
 		dc.SetTextForeground(pts.color)
 	brush.SetColour(pen.GetColour())
 	brush.SetStyle(100)
-	if not pts.color is None:
+	if not pts.fill is None:
+		dc.SetBackgroundMode((106, 100)[pts.fill])
+	if not pts.fcolor is None:
 		dc.SetTextBackground(pts.fcolor)
-	if not pts.lw is None:
-		font.SetPointSize(pts.lw)
+	if not pts.size is None:
+		font.SetPointSize(pts.size)
 
 	dc.SetPen(pen)
 	dc.SetBrush(brush)
@@ -279,17 +283,21 @@ def draw_text(pts, dc, f, **key):
 
 	if pts.dtype == 'text':
 		(x, y), text = pts.body, pts.txt
+		ox, oy = pts.offset
 		x, y = f(x, y)
-		dc.DrawText(text, x+3, y+3)
-		if pts.fill:
-			dc.DrawEllipse(x-2,y-2,4,4)
+		dc.DrawText(text, x+1+ox, y+1+oy)
+		if not pts.lstyle is None:
+			dc.DrawEllipse(x+ox-2,y+oy-2,4,4)
 	if pts.dtype == 'texts':
 		tlst, clst, elst = [], [], []
 		x, y = pts.body.T
+		ox, oy = pts.offset
 		tlst = pts.txt
+
 		x, y = f(x, y)
+		x += ox; y += oy;
 		r = x * 0 + 4
-		dc.DrawTextList(tlst, np.vstack((x,y)).T)
+		dc.DrawTextList(tlst, np.vstack((x+1,y+1)).T)
 		if pts.fill:
 			dc.DrawEllipseList(np.vstack((x,y,r,r)).T)
 
@@ -311,20 +319,22 @@ draw_dic = {'points':plot, 'point':plot, 'line':plot,
 			'text':draw_text, 'texts':draw_text}
 
 def draw(obj, dc, f, **key): 
+	if len(obj.body)==0: return
 	draw_dic[obj.dtype](obj, dc, f, **key)
 
 def draw_layer(pts, dc, f, **key):
 	pen, brush = dc.GetPen(), dc.GetBrush()
 	width, color = pen.GetWidth(), pen.GetColour()
 	fcolor, style = brush.GetColour(), brush.GetStyle()
+	tcolor = dc.GetTextForeground()
 	if pts.color: 
 		pen.SetColour(pts.color)
+	if pts.tcolor:
+		dc.SetTextForeground(pts.tcolor)
 	if pts.fcolor: 
 		brush.SetColour(pts.fcolor)
 	if pts.lw != None: 
 		pen.SetWidth(pts.lw)
-	if pts.fill: 
-		brush.SetStyle((106,100)[pts.fill])
 	if not pts.fill is None:
 		brush.SetStyle((106,100)[pts.fill])
 
@@ -333,6 +343,7 @@ def draw_layer(pts, dc, f, **key):
 
 	for i in pts.body:draw(i, dc, f, **key)
 
+	dc.SetTextForeground(tcolor)
 	pen.SetWidth(width)
 	pen.SetColour(color)
 	brush.SetColour(fcolor)
@@ -370,30 +381,17 @@ def draw_layers(pts, dc, f, **key):
 
 draw_dic['layers'] = draw_layers
 
-default_color = (255, 255, 0)
-default_face = (255, 255, 255)
-default_fill = True
-default_lw = 1
-default_tcolor = (255, 0, 0)
-default_tsize = 8
-
 def drawmark(dc, f, body, **key):
+	default_style = body.default
 	pen, brush, font = dc.GetPen(), dc.GetBrush(), dc.GetFont()
-	pen.SetColour(default_color or (255,255,0))
-	brush.SetColour(default_face or (255,255,255))
-	brush.SetStyle((106,100)[default_fill or False])
-	pen.SetWidth(default_lw or 1)
-	dc.SetTextForeground(default_tcolor or (255,0,0))
-	font.SetPointSize(default_tsize or 8)
+	pen.SetColour(default_style['color'])
+	brush.SetColour(default_style['fcolor'])
+	brush.SetStyle((106,100)[default_style['fill']])
+	pen.SetWidth(default_style['lw'])
+	dc.SetTextForeground(default_style['tcolor'])
+	font.SetPointSize(default_style['size'])
 	dc.SetPen(pen); dc.SetBrush(brush); dc.SetFont(font);
 	draw(body, dc, f, **key)
-
-class GeometryMark:
-	def __init__(self, body):
-		self.body = body
-
-	def draw(self, dc, f, **key):
-		drawmark(dc, f, self.body, key)
 
 if __name__ == '__main__':
 	pass

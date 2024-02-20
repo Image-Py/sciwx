@@ -1,10 +1,12 @@
 from .shpbase import *
+from ...util import geom_flatten
 
 def inbase(key, btn):
 	status = key['ctrl'], key['alt'], key['shift']
 	return status == (1,1,0) or btn in {2,3}
 
 class PointEditor(BaseEditor):
+	title = 'Point Tool'
 	def __init__(self): 
 		BaseEditor.__init__(self)
 
@@ -16,6 +18,7 @@ class PointEditor(BaseEditor):
 			shp.dirty = True
 
 class LineEditor(BaseEditor):
+	title = 'Line Tool'
 	def __init__(self): 
 		BaseEditor.__init__(self)
 		self.cur, self.n, self.obj = 0, 0, None
@@ -39,6 +42,7 @@ class LineEditor(BaseEditor):
 		shp.dirty = True
 
 class PolygonEditor(BaseEditor):
+	title = 'Polygon Tool'
 	def __init__(self): 
 		BaseEditor.__init__(self)
 		self.cur, self.n, self.obj = 0, 0, None
@@ -60,20 +64,21 @@ class PolygonEditor(BaseEditor):
 			shp.body[-1] = Polygon(body)
 			if key['alt'] or key['shift']:
 				obj = shp.body.pop(-1)
-				rst = union(shp.to_geom())
+				rst = geom_union(shp.to_geom())
 				if key['alt'] and not key['shift']:
 					rst = rst.difference(obj.to_geom())
 				if key['shift'] and not key['alt']:
 					rst = rst.union(obj.to_geom())
 				if key['shift'] and key['alt']:
 					rst = rst.intersection(obj.to_geom())
-				layer = geom2shp(geom2collection(rst))
+				layer = geom2shp(geom_flatten(rst))
 				shp.body = layer.body
 			self.obj, shp.dirty = None, True
 			del key['canvas'].marks['buffer']
 		shp.dirty = True
 
 class RectangleEditor(BaseEditor):
+	title = 'Rectangle Tool'
 	def __init__(self): 
 		BaseEditor.__init__(self)
 		self.obj, self.p = None, None
@@ -91,19 +96,19 @@ class RectangleEditor(BaseEditor):
 		if inbase(key, btn):
 			BaseEditor.mouse_up(self, shp, x, y, btn, **key)
 		if key['alt'] and key['ctrl']: return
-		if self.p == (x, y):
+		if self.p == (x, y) and not self.obj is None:
 			self.obj = self.p = None
 			return shp.body.pop(-1)
-		if key['alt'] or key['shift']:
+		if (key['alt'] or key['shift']) and not self.obj is None:
 			obj = shp.body.pop(-1)
-			rst = union(shp.to_geom())
+			rst = geom_union(shp.to_geom())
 			if key['alt'] and not key['shift']:
 				rst = rst.difference(obj.to_geom())
 			if key['shift'] and not key['alt']:
 				rst = rst.union(obj.to_geom())
 			if key['shift'] and key['alt']:
 				rst = rst.intersection(obj.to_geom())
-			layer = geom2shp(geom2collection(rst))
+			layer = geom2shp(geom_flatten(rst))
 			shp.body = layer.body
 		self.obj, shp.dirty = None, True
 		if 'buffer' in key['canvas'].marks:
@@ -119,6 +124,7 @@ class RectangleEditor(BaseEditor):
 			self.obj.dirty = shp.dirty = True
 
 class EllipseEditor(BaseEditor):
+	title = 'Ellipse Tool'
 	def __init__(self): 
 		BaseEditor.__init__(self)
 		self.obj, self.p = None, None
@@ -136,19 +142,19 @@ class EllipseEditor(BaseEditor):
 		if inbase(key, btn):
 			BaseEditor.mouse_up(self, shp, x, y, btn, **key)
 		if key['alt'] and key['ctrl']: return
-		if self.p == (x, y):
+		if self.p == (x, y) and not self.obj is None:
 			self.obj = self.p = None
 			return shp.body.pop(-1)
-		if key['alt'] or key['shift']:
+		if (key['alt'] or key['shift']) and not self.obj is None:
 			obj = shp.body.pop(-1)
-			rst = union(shp.to_geom())
+			rst = geom_union(shp.to_geom())
 			if key['alt'] and not key['shift']:
 				rst = rst.difference(obj.to_geom())
 			if key['shift'] and not key['alt']:
 				rst = rst.union(obj.to_geom())
 			if key['shift'] and key['alt']:
 				rst = rst.intersection(obj.to_geom())
-			layer = geom2shp(geom2collection(rst))
+			layer = geom2shp(geom_flatten(rst))
 			shp.body = layer.body
 		self.obj, shp.dirty = None, True
 		if 'buffer' in key['canvas'].marks:
@@ -165,6 +171,7 @@ class EllipseEditor(BaseEditor):
 			shp.dirty = self.obj.dirty = True
 
 class FreeLineEditor(BaseEditor):
+	title = 'Free Line Tool'
 	def __init__(self): 
 		BaseEditor.__init__(self)
 		self.cur, self.n, self.obj = 0, 0, None
@@ -192,6 +199,7 @@ class FreeLineEditor(BaseEditor):
 			self.obj.dirty = shp.dirty = True
 
 class FreePolygonEditor(BaseEditor):
+	title = 'Free Polygon Tool'
 	def __init__(self): 
 		BaseEditor.__init__(self)
 		self.cur, self.n, self.obj = 0, 0, None
@@ -216,14 +224,14 @@ class FreePolygonEditor(BaseEditor):
 			shp.body[-1] = Polygon(body)
 			if key['alt'] or key['shift']:
 				obj = shp.body.pop(-1)
-				rst = union(shp.to_geom())
+				rst = geom_union(shp.to_geom())
 				if key['alt'] and not key['shift']:
 					rst = rst.difference(obj.to_geom())
 				if key['shift'] and not key['alt']:
 					rst = rst.union(obj.to_geom())
 				if key['shift'] and key['alt']:
 					rst = rst.intersection(obj.to_geom())
-				layer = geom2shp(geom2collection(rst))
+				layer = geom2shp(geom_flatten(rst))
 				shp.body = layer.body
 			self.obj, shp.dirty = None, True
 

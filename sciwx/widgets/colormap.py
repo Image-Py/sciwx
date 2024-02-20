@@ -1,19 +1,17 @@
 import numpy as np
 import wx.adv
 import sys, wx
+from sciwx import ColorManager
 
 class CMapSelCtrl(wx.adv.OwnerDrawnComboBox):
     def __init__(self, parent):
         wx.adv.OwnerDrawnComboBox.__init__(self, parent, choices=[], 
             style=wx.CB_READONLY, pos=(20,40), size=(256, 30))
+        self.SetItems(ColorManager.gets())
 
     def SetItems(self, kvs):
         self.Clear()
-        ks, vs = list(kvs.keys()), list(kvs.values())
-        if 'Grays' in ks:
-            i = ks.index('Grays')
-            ks.insert(0, ks.pop(i))
-            vs.insert(0, vs.pop(i))
+        ks, vs = [i[0] for i in kvs], [i[1] for i in kvs]
         self.AppendItems(ks)
         self.Select(0)
         self.ks, self.vs = ks, vs
@@ -41,8 +39,8 @@ class CMapSelCtrl(wx.adv.OwnerDrawnComboBox):
 
         # for painting the items in the popup
         dc.DrawText(self.GetString( item),
-                    r.x + 3,
-                    (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2
+                    int(r.x+0.5) + 3,
+                    int((r.y + 0) + ((r.height/2) - dc.GetCharHeight())/2 + 0.5)
                     )
         #dc.DrawLine( r.x+5, r.y+((r.height/4)*3)+1, r.x+r.width - 5, r.y+((r.height/4)*3)+1 )
         arr = np.zeros((10,256,3),dtype=np.uint8)
@@ -65,10 +63,8 @@ class CMapSelCtrl(wx.adv.OwnerDrawnComboBox):
     def OnMeasureItem(self, item):
         return 30
         # Simply demonstrate the ability to have variable-height items
-        if item & 1:
-            return 36
-        else:
-            return 24
+        if item & 1: return 36
+        else: return 24
 
     # Overridden from OwnerDrawnComboBox.  Callback for item width, or
     # -1 for default/undetermined
@@ -76,7 +72,7 @@ class CMapSelCtrl(wx.adv.OwnerDrawnComboBox):
         return -1; # default - will be measured from text width
 
 class CMapSelPanel(wx.Panel):
-    def __init__( self, parent, title):
+    def __init__( self, parent, title, app=None):
         wx.Panel.__init__(self, parent)
         sizer = wx.BoxSizer(wx.VERTICAL)
         lab_title = wx.StaticText( self, wx.ID_ANY, title,

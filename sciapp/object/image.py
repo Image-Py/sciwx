@@ -7,7 +7,7 @@ def get_updown(imgs, slices='all', chans='all', step=1):
     if isinstance(slices, int): imgs = [imgs[slices]]
     if step<=1: step = int(1/step+0.5)
     else: step = int(min(imgs[0].shape[:2])/step+0.5)
-    s = slice(None, None, max(step,1))
+    s = slice(None, None, max(step, 1))
     s = (s,s,c)[:imgs[0].ndim]
     mins = [i[s].min(axis=(0,1)) for i in imgs]
     maxs = [i[s].max(axis=(0,1)) for i in imgs]
@@ -45,18 +45,24 @@ def histogram(imgs, rg=(0,256), slices='all', chans='all', step=1):
 class Image:
     def __init__(self, imgs=None, name='Image'):
         self.name = name
+        self.cur = 0
+        self.rg = [(0, 255)]
         self.set_imgs(imgs)
         self.roi = None
+        self.mark = None
+        self.unit = 1, 'pix'
+        self.msk = None
         self.pos = (0,0)
         self.cn = 0
-        self.rg = (0,255)
+        
         self.lut = default_lut
         self.log = False
         self.mode = 'set'
-        self.cur = 0
         self.dirty = False
         self.snap = None
         self.back = None
+        self.tool = None
+        self.data = {}
 
     @property
     def box(self):
@@ -75,7 +81,7 @@ class Image:
         self.reset()
         
     def set_imgs(self, imgs):
-        self.imgs = imgs or [imgs]
+        self.imgs = [imgs] if imgs is None else imgs
         if not imgs is None: self.reset()
 
     @property
@@ -85,6 +91,9 @@ class Image:
 
     @property
     def slices(self): return len(self.imgs)
+
+    @property
+    def isarray(self): return isinstance(self.imgs, np.ndarray)
 
     @property
     def nbytes(self):
@@ -98,8 +107,8 @@ class Image:
 
     @property
     def info(self):
-        return '%sx%s  S:%s/%s  C:%s/%s'%(*self.shape,
-            self.cur+1, self.slices, self.cn, self.channels)
+        return '%s  %sx%s  S:%s/%s  C:%s/%s  %.2fM'%(str(self.dtype).upper(), *self.shape,
+            self.cur+1, self.slices, self.cn, self.channels, self.nbytes/1024/1024)
 
     @property
     def range(self):
@@ -110,19 +119,40 @@ class Image:
     def range(self, value):
         self.rg = [value] * len(self.rg)
 
+    def mask(self, mode='in'):
+        if self.roi==None: return None
+        if self.roi.msk != mode:
+            self.msk = self.roi.to_mask(self.shape, mode)
+        return self.msk    
+
+    @property
+    def rect(self):
+        if self.roi is None: return slice(None), slice(None)
+        box, shape = self.roi.box, self.shape
+        l, r = max(0, int(box[0])), min(shape[1], int(box[2]))
+        t, b = max(0, int(box[1])), min(shape[0], int(box[3]))
+        return slice(t,b), slice(l,r)
+
+    def subimg(self, s1=None, s2=None):
+        s1 = s1 or self.rect[0]
+        s2 = s2 or self.rect[1]
+        if self.isarray: return self.imgs[s1, s2]
+        else: return [i[s1, s2] for i in self.imgs]
+
     def update(self): self.dirty = True
 
     def reset(self):
-        self.cn = [0, (0,1,2)][self.channels==3]
-        print(self.cn)
-        if self.dtype == np.uint8:
+        self.cn = [0, [0,1,2]][self.channels==3]
+        if self.dtype == np.uint8: 
             self.rg = [(0, 255)] * self.channels
         else: 
             self.rg = self.get_updown('all', 'all', step=512)
 
     def snapshot(self):
-        if self.snap is None:
-            self.snap = self.img.copy()
+        dif = self.snap is None
+        dif = dif or self.snap.shape != self.img.shape
+        dif = dif or self.snap.dtype != self.img.dtype
+        if dif: self.snap = self.img.copy()
         else: self.snap[:] = self.img
 
     def swap(self):
@@ -134,19 +164,16 @@ class Image:
         if slices is None: slices = self.cur
         if chans is None: chans = self.cn
         if rg is None: rg = self.range
-        print(rg, slices, chans, step)
         return histogram(self.imgs, rg, slices, chans, step)
 
-    def get_updown(self, slices='all', chans='one', step=1):
+    def get_updown(self, slices='all', chans='all', step=512):
         if slices is None: slices = self.cur
         if chans is None: chans = self.cn
         return get_updown(self.imgs, slices, chans, step)
 
     def lookup(self, img=None):
         if img is None: img = self.img
-        a = lookup(img, self.cn, self.rg, self.lut)
-        print(a.shape)
-        return a
+        return lookup(img, self.cn, self.rg, self.lut)
 
 if __name__ == '__main__':
     img = Image(np.zeros((5,5)))

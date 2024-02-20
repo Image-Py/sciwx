@@ -7,7 +7,7 @@ if __name__ == '__main__':
 
     view = [('lab', 'lab', 'This is a questionnaire'),
             (str, 'name', 'name', 'please'), 
-            (int, 'age', (0,150), 0, 'age', 'years old'),
+            (int, 'age', (0,150), 0, 'age', 'years old ============'),
             (float, 'h', (0.3, 2.5), 2, 'height', 'm'),
             ('slide', 'w', (1, 150), 0, 'weight','kg'),
             (bool, 'sport', 'do you like sport'),
@@ -16,6 +16,7 @@ if __name__ == '__main__':
             ('color', 'c', 'which', 'you like')]
 
     app = wx.App()
+    dic = {'height':'高度', 'm':'米'}
     pd = ParaDialog(None, 'Test')
     pd.init_view(view, para, preview=True, modal=False)
     pd.pack()

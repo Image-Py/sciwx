@@ -1,6 +1,6 @@
 import numpy as np
 from time import time
-from collections import Iterable
+from collections.abc import Iterable
 import shapely.geometry as geom
 from shapely.ops import unary_union
 
@@ -10,16 +10,21 @@ def merge(a, b):
     return [x1, y1, x2, y2]
 
 class Shape:
+    default = {'color':(255,255,0), 'fcolor':(255,255,255), 
+    'fill':False, 'lw':1, 'tcolor':(255,0,0), 'font':'Arial', 'size':10}
     dtype = 'shape'
-    def __init__(self, body=[], **key):
+    def __init__(self, body=None, **key):
         self.name = 'shape'
-        self.body = []
+        self.body = [] if body is None else body
         self.color = key['color'] if 'color' in key else None
-        self.fcolor = key['fcolor'] if 'fcolor' in key else None
-        self.lstyle = key['lstyle'] if 'lstyle' in key else None
-        self.lw = key['lw'] if 'lw' in key else None
-        self.r = key['r'] if 'r' in key else None
-        self.fill = key['fill'] if 'fill' in key else None
+        self.fcolor = key.get('fcolor', None)
+        self.lstyle = key.get('style', None)
+        self.tcolor = key.get('tcolor', None)
+        self.size = key.get('size', None)
+        self.font = key.get('font', None)
+        self.lw = key.get('lw', None)
+        self.r = key.get('r', None)
+        self.fill = key.get('fill', None)
         self._box = None
         self.dirty = True
 
@@ -37,6 +42,8 @@ class Shape:
         if not self.lstyle is None: styledic['lstyle']=self.lstyle
         if not self.lw is None: styledic['lw']=self.lw
         if not self.fill is None: styledic['fill']=self.fill
+        if not self.font is None: styledic['font']=self.font
+        if not self.size is None: styledic['size']=self.size
         return styledic
         
     def count_box(self, body=None, box=None):
@@ -80,7 +87,7 @@ class Point(Shape):
         self.body = np.array(body, dtype=np.float32)
 
     def to_mark(self):
-        return Shape.to_mark(self, tuple(self.body))
+        return Shape.to_mark(self, tuple(self.body.tolist()))
 
     def to_geom(self):
         return geom.Point(self.body)
@@ -92,7 +99,7 @@ class Points(Shape):
         self.body = np.array(body, dtype=np.float32)
 
     def to_mark(self):
-        return Shape.to_mark(self, [tuple(i) for i in self.body])
+        return Shape.to_mark(self, [tuple(i.tolist()) for i in self.body])
 
     def to_geom(self):
         return geom.MultiPoint(self.body)
@@ -104,7 +111,7 @@ class Line(Shape):
         self.body = np.array(body, dtype=np.float32)
 
     def to_mark(self):
-        return Shape.to_mark(self, [tuple(i) for i in self.body])
+        return Shape.to_mark(self, [tuple(i.tolist()) for i in self.body])
 
     def to_geom(self):
         return geom.LineString(self.body)
@@ -116,7 +123,7 @@ class Lines(Shape):
         self.body = [np.array(i, dtype=np.float32) for i in body]
 
     def to_mark(self):
-        return Shape.to_mark(self, [[tuple(i) for i in j] for j in self.body])
+        return Shape.to_mark(self, [[tuple(i.tolist()) for i in j] for j in self.body])
 
     def to_geom(self):
         return geom.MultiLineString(self.body)
@@ -129,7 +136,7 @@ class Polygon(Shape):
         self.body = [np.array(i, dtype=np.float32) for i in body]
 
     def to_mark(self):
-        return Shape.to_mark(self, [[tuple(i) for i in j] for j in self.body])
+        return Shape.to_mark(self, [[tuple(i.tolist()) for i in j] for j in self.body])
 
     def to_geom(self):
         return geom.Polygon(self.body[0], self.body[1:])
@@ -144,8 +151,8 @@ class Polygons(Shape):
 
     def to_mark(self):
         mark = self.style
-        f = lambda x:[[tuple(i) for i in j] for j in x]
-        return Shape.to_mark(self, [[[tuple(i) for i in j] for j in k] for k in self.body])
+        f = lambda x:[[tuple(i.tolist()) for i in j] for j in x]
+        return Shape.to_mark(self, [[[tuple(i.tolist()) for i in j] for j in k] for k in self.body])
 
     def to_geom(self):
         return geom.MultiPolygon([[i[0], i[1:]] for i in self.body])
@@ -161,7 +168,7 @@ class Circle(Shape):
         return [pts[0]-pts[2], pts[1]-pts[2], pts[0]+pts[2], pts[1]+pts[2]]
     
     def to_mark(self):
-        return Shape.to_mark(self, tuple(self.body))
+        return Shape.to_mark(self, tuple(self.body.tolist()))
 
     def to_geom(self):
         return geom.Point(self.body[:2]).buffer(self.body[2])
@@ -177,7 +184,7 @@ class Circles(Shape):
         return [(pts[0]-pts[2]).min(), (pts[1]-pts[2]).min(), (pts[0]+pts[2]).max(), (pts[1]+pts[2]).max()]
     
     def to_mark(self):
-        return Shape.to_mark(self, [tuple(i) for i in self.body])
+        return Shape.to_mark(self, [tuple(i.tolist()) for i in self.body])
 
     def to_geom(self):
         return geom.MultiPolygon([geom.Point(i[:2]).buffer(i[2]) for i in self.body])
@@ -192,7 +199,7 @@ class Rectangle(Shape):
         return [self.body[0], self.body[1], self.body[0]+self.body[2], self.body[1]+self.body[3]]
     
     def to_mark(self):
-        return Shape.to_mark(self, tuple(self.body))
+        return Shape.to_mark(self, tuple(self.body.tolist()))
 
     def to_geom(self):
         f = lambda x:[(x[0],x[1]),(x[0],x[1]+x[3]),(x[0]+x[2],x[1]+x[3]),(x[0]+x[2],x[1])]
@@ -212,7 +219,7 @@ class Rectangles(Shape):
         return [minx, miny, maxx, maxy]
     
     def to_mark(self):
-        return Shape.to_mark(self, [tuple(i) for i in self.body])
+        return Shape.to_mark(self, [tuple(i.tolist()) for i in self.body])
 
     def to_geom(self):
         f = lambda x:[(x[0],x[1]),(x[0],x[1]+x[3]),(x[0]+x[2],x[1]+x[3]),(x[0]+x[2],x[1])]
@@ -237,7 +244,7 @@ class Ellipse(Shape):
         return [minx, miny, maxx, maxy]
     
     def to_mark(self):
-        return Shape.to_mark(self, tuple(self.body))
+        return Shape.to_mark(self, tuple(self.body.tolist()))
 
     def to_geom(self):
         return geom.Polygon(make_ellipse(*self.body))
@@ -254,7 +261,7 @@ class Ellipses(Shape):
         return [minx, miny, maxx, maxy]
     
     def to_mark(self):
-        return Shape.to_mark(self, [tuple(i) for i in self.body])
+        return Shape.to_mark(self, [tuple(i.tolist()) for i in self.body])
 
     def to_geom(self):
         return geom.MultiPolygon([[make_ellipse(*i),[]] for i in self.body])
@@ -263,11 +270,14 @@ class Text(Shape):
     dtype = 'text'
     def __init__(self, body=[], **key):
         Shape.__init__(self, body, **key)
+        self.height
+        self.offset = key.get('offset', [0,0])
         self.body = np.array(body[:2], dtype=np.float32)
         self.txt = body[2]
 
     def to_mark(self):
-        return Shape.to_mark(self, tuple(self.body)+(self.txt,))
+        mark = Shape.to_mark(self, tuple(self.body.tolist())+(self.txt,))
+        mark['offset'] = self.offset; return mark
 
     def to_geom(self):
         return geom.Point(self.body)
@@ -276,21 +286,22 @@ class Texts(Shape):
     dtype = 'texts'
     def __init__(self, body=[], **key):
         Shape.__init__(self, body, **key)
-        body = np.array(body, dtype=object)
+        self.offset = key.get('offset', [0,0])
+        body = np.array(body, dtype=object).reshape(-1,3)
         self.body = body[:,:2].astype(np.float32)
         self.txt = body[:,2]
 
     def to_mark(self):
-        return Shape.to_mark(self, [(i,j,t) for (i,j), t in zip(self.body, self.txt)])
+        mark = Shape.to_mark(self, [(i,j,t) for (i,j), t in zip(self.body.tolist(), self.txt.tolist())])
+        mark['offset'] = self.offset; return mark
 
     def to_geom(self):
         return geom.MultiPoint(self.body)
     
 class Layer(Shape):
     dtype = 'layer'
-    def __init__(self, body=[], **key):
+    def __init__(self, body=None, **key):
         Shape.__init__(self, body, **key)
-        self.body = body
 
     @property
     def box(self):
@@ -304,12 +315,11 @@ class Layer(Shape):
     def to_geom(self):
         return geom.GeometryCollection([i.to_geom() for i in self.body])
 
-class Layers:
+class Layers(Shape):
     dtype = 'layers'
-    def __init__(self, body={}, **key):
+    def __init__(self, body=None, **key):
         Shape.__init__(self, body, **key)
-        self.body = body
-
+        
     @property
     def box(self):
         if len(self.body)==0: return None
@@ -319,38 +329,15 @@ class Layers:
     def to_mark(self):
         body = dict(zip(self.body.keys(), [i.to_mark() for i in self.body.values()]))
         return Shape.to_mark(self, body)
-    
+
 def mark2shp(mark):
     style = mark.copy()
     style.pop('body')
-    if mark['type']=='point':
-        return Point(mark['body'], **style)
-    if mark['type']=='points':
-        return Points(mark['body'], **style)
-    if mark['type']=='line':
-        return Line(mark['body'], **style)
-    if mark['type']=='lines':
-        return Lines(mark['body'], **style)
-    if mark['type']=='polygon':
-        return Polygon(mark['body'], **style)
-    if mark['type']=='polygons':
-        return Polygons(mark['body'], **style)
-    if mark['type']=='circle':
-        return Circle(mark['body'], **style)
-    if mark['type']=='circles':
-        return Circles(mark['body'], **style)
-    if mark['type']=='rectangle':
-        return Rectangle(mark['body'], **style)
-    if mark['type']=='rectangles':
-        return Rectangles(mark['body'], **style)
-    if mark['type']=='ellipse':
-        return Ellipse(mark['body'], **style)
-    if mark['type']=='ellipses':
-        return Ellipses(mark['body'], **style)
-    if mark['type']=='text':
-        return Text(mark['body'], **style)
-    if mark['type']=='texts':
-        return Texts(mark['body'], **style)
+    keys = {'point':Point, 'points':Points, 'line':Line, 'lines':Lines,
+            'polygon':Polygon, 'polygons':Polygons, 'circle':Circle,
+            'circles':Circles, 'rectangle':Rectangle, 'rectangles':Rectangles,
+            'ellipse':Ellipse, 'ellipses':Ellipses, 'text':Text, 'texts':Texts}
+    if mark['type'] in keys: return keys[mark['type']](mark['body'], **style)
     if mark['type']=='layer':
         return Layer([mark2shp(i) for i in mark['body']], **style)
     if mark['type']=='layers':
@@ -375,21 +362,13 @@ def json2shp(obj):
 
 def geom2shp(obj): return json2shp(geom.mapping(obj))
 
-def geom2collection(obj, geoms=None):
-    geoms, root = ([], True) if geoms is None else (geoms, False)
-    if isinstance(obj, geom.GeometryCollection):
-        for i in obj: geom2collection(i, geoms)
-    elif type(obj) in {geom.MultiPolygon, geom.MultiPoint, geom.MultiLineString}: 
-        geoms.extend(list(obj))
-    else: geoms.append(obj)
-    if root: return geom.GeometryCollection(geoms)
-
-def union(obj):
-    rst = unary_union(geom2collection(obj))
-    return geom2collection(rst)
-
 if __name__ == '__main__':
     import json
+
+    layer = {'type': 'layer', 'body': [{'type': 'circle', 'body': (256, 256, 5)}, {'type': 'circle', 'body': (256, 256, 50)}, {'type': 'circle', 'body': (306.0, 256.0, 3)}]}
+    layers = {'type':'layers', 'body':{1:{'type':'layer', 'body':[]}}}
+    a = mark2shp(layers)
+    print(a)
     #import geonumpy.io as gio
     #shp = gio.read_shp('C:/Users/54631/Documents/projects/huangqu/demo/shape/province.shp')
     #feas = json.loads(shp.to_json())['features']

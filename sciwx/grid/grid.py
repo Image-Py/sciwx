@@ -1,4 +1,5 @@
 from sciapp.object import Table
+from sciapp.action import TableTool
 import wx, os
 import wx.grid
 import sys
@@ -173,9 +174,14 @@ class Grid(wx.grid.Grid):
     def __init__(self, parent):
         wx.grid.Grid.__init__(self, parent, -1)
         self.tablebase = TableBase()
-        self.Bind(wx.grid.EVT_GRID_RANGE_SELECT, self.on_select)
         self.table = Table()
+        self.tool = None
+
+        self.Bind(wx.grid.EVT_GRID_RANGE_SELECT, self.on_select)
         self.Bind(wx.grid.EVT_GRID_LABEL_RIGHT_CLICK, self.on_label)
+        self.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.on_cell)
+        self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.on_cell)
+        self.Bind(wx.EVT_IDLE, self.on_idle)
 
     def on_label(self, evt):
         row, col = evt.GetRow(), evt.GetCol()
@@ -194,12 +200,23 @@ class Grid(wx.grid.Grid):
             print(para)
             if col!=-1:
                 props[self.table.columns[col]] = [para[i] for i in ['accu', 'tc', 'lc', 'ln']]
-                print(props[self.table.columns[col]])
-                print('===========')
+                #print(props[self.table.columns[col]])
+                #print('===========')
             if col==-1:
                 for c in self.table.columns:
                     props[c] = [para[i] for i in ['accu', 'tc', 'lc', 'ln']]
         self.update()
+
+    def on_cell(self, me):
+        x, y = me.GetCol(), me.GetRow()
+        obj, tol = self.table, TableTool.default
+        tool = self.tool or tol
+        #ld, rd, md = me.LeftIsDown(), me.RightIsDown(), me.MiddleIsDown()
+        sta = [me.AltDown(), me.ControlDown(), me.ShiftDown()]
+        others = {'alt':sta[0], 'ctrl':sta[1],
+            'shift':sta[2], 'grid':self}
+        tool.mouse_down(self.table, x, y, 0, **others)
+        me.Skip()
 
     def set_data(self, tab):
         if isinstance(tab, Table):
@@ -231,7 +248,16 @@ class Grid(wx.grid.Grid):
             self.SelectRow(i, True)
         for i in self.table.columns.get_indexer(self.table.colmsk):
             self.SelectCol(i, True)
-        self.Bind(Grid.EVT_GRID_RANGE_SELECT, self.on_select)
+        self.Bind(wx.grid.EVT_GRID_RANGE_SELECT, self.on_select)
+
+    def on_idle(self, event):
+        if not self.IsShown() or self.table is None\
+            or self.table.dirty == False: return
+        
+        self.tablebase.ResetView(self)
+        self.table.dirty = False
+        # self.select()
+        print('update')
 
     def __del__(self):
         print('grid deleted!!!')

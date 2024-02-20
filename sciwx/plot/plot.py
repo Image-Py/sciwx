@@ -18,7 +18,6 @@ class PlotFrame(wx.Frame):
     def __init__(self, parent, toolbar=True):
         wx.Frame.__init__(self, parent, -1,
                           'CanvasFrame', size=(550, 350))
-
         self.figure = PlotCanvas(self)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.Add(self.figure, 1, wx.LEFT | wx.TOP | wx.EXPAND)
@@ -31,7 +30,6 @@ class PlotFrame(wx.Frame):
     def on_idle(self, event):
         if self.GetTitle()!=self.figure.title:
             self.SetTitle(self.figure.title)
-
 
     def add_toolbar(self):
         self.toolbar = NavigationToolbar(self.figure)
@@ -77,7 +75,6 @@ class PlotNoteBook(wx.lib.agw.aui.AuiNotebook):
         if self.figure() is None: return
         self.figure().mpl_connect(
             'motion_notify_event', self.mouse_move)        
-
 
 class PlotNoteFrame(wx.Frame):
     def __init__(self, parent, toolbar=True):

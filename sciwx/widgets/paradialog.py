@@ -1,10 +1,14 @@
 import wx, platform
 from .normal import *
+from .advanced import *
 from .histpanel import HistPanel
+from .curvepanel import CurvePanel
+from .threpanel import ThresholdPanel
 
 widgets = { 'ctrl':None, 'slide':FloatSlider, int:NumCtrl, 'path':PathCtrl,
             float:NumCtrl, 'lab':Label, bool:Check, str:TextCtrl, list:Choice,
-            'color':ColorCtrl, 'any':AnyType, 'chos':Choices, 'hist':HistPanel}
+            'color':ColorCtrl, 'cmap':CMapSelPanel, 'any':AnyType, 'chos':Choices, 'hist':ThresholdPanel,
+            'curve':CurvePanel, 'img':ImageList, 'tab':TableList, 'field':TableField, 'fields':TableFields}
 
 def add_widget(key, value): widgets[key] = value
 
@@ -29,43 +33,44 @@ class ParaDialog (wx.Dialog):
     def add_confirm(self, modal):
         sizer = wx.BoxSizer( wx.HORIZONTAL )
         self.btn_ok = wx.Button( self, wx.ID_OK, 'OK', wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
-        sizer.Add( self.btn_ok, 0, wx.ALIGN_RIGHT|wx.ALL, 5 )
+        self.btn_ok.SetFocus()
+        sizer.Add( self.btn_ok, 0, wx.ALL, 5 )
 
         self.btn_cancel = wx.Button( self, wx.ID_CANCEL, 'Cancel', wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
-        sizer.Add( self.btn_cancel, 0, wx.ALIGN_RIGHT|wx.ALL, 5 )
+        sizer.Add( self.btn_cancel, 0, wx.ALL, 5 )
 
         self.btn_help = wx.Button( self, wx.ID_HELP, 'Help', wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
-        sizer.Add( self.btn_help, 0, wx.ALIGN_RIGHT|wx.ALL, 5 )
+        sizer.Add( self.btn_help, 0, wx.ALL, 5 )
         self.lst.Add(sizer, 0, wx.ALIGN_RIGHT, 5 )
         self.btn_help.Bind(wx.EVT_BUTTON, lambda e: self.on_help and self.on_help())
         if not modal:
             self.btn_ok.Bind( wx.EVT_BUTTON, lambda e:self.commit('ok'))
             self.btn_cancel.Bind( wx.EVT_BUTTON, lambda e:self.commit('cancel'))
-            
         #self.lst.Add()
 
-    def init_view(self, items, para, preview=False, modal = True):
+    def init_view(self, items, para, preview=False, modal=True, app=None):
         self.para, self.modal = para, modal
         for item in items:
-            self.add_ctrl_(widgets[item[0]], item[1], item[2:])
-        if preview:self.add_ctrl_(Check, 'preview', ('preview',))
+            self.add_ctrl_(widgets[item[0]], item[1], item[2:], app=app)
+        if preview: self.add_ctrl_(Check, 'preview', ('preview',), app=app)
         self.reset(para)
+        for p in self.ctrl_dic:
+            if p in para: para[p] = self.ctrl_dic[p].GetValue()
         self.add_confirm(modal)
-        self.pack()
-        self.Bind(wx.EVT_WINDOW_DESTROY, self.OnDestroy)
-        print('bind close')
-    
+        wx.Dialog.Bind(self, wx.EVT_WINDOW_DESTROY, self.OnDestroy)
+        #wx.Dialog.Bind(self, wx.EVT_IDLE, lambda e: self.reset())
     
     def OnDestroy( self, event ):
-        self.set_handle(None)
+        self.handle = print
         self.on_cancel = self.on_ok = self.on_help = None
         del self.ctrl_dic
 
     def parse(self, para) :
         self.add_ctrl_(widgets[para[0]], *para[1:])
 
-    def add_ctrl_(self, Ctrl, key, p):
-        ctrl = Ctrl(self, *p)
+    def add_ctrl_(self, Ctrl, key, p, app=None):
+        ctrl = Ctrl(self, *p, app=app)
+
         if not p[0] is None: 
             self.ctrl_dic[key] = ctrl
         if hasattr(ctrl, 'Bind'):
@@ -76,7 +81,6 @@ class ParaDialog (wx.Dialog):
         self.lst.Add( ctrl, 0, wx.EXPAND, 0 )
 
     def pack(self):
-        self.Layout()
         mint, minu = [], []
         for t,u in self.tus:
             if not t is None: mint.append(t.GetSize()[0])
@@ -84,6 +88,7 @@ class ParaDialog (wx.Dialog):
         for t,u in self.tus:
             if not t is None:t.SetInitialSize((max(mint),-1))
             if not u is None:u.SetInitialSize((max(minu),-1))
+        self.Layout()
         self.Fit()
 
     def para_check(self, para, key):pass
@@ -109,7 +114,7 @@ class ParaDialog (wx.Dialog):
 
     def reset(self, para=None):
         if para!=None:self.para = para
-        for p in list(self.para.keys()):
+        for p in self.para.keys():
             if p in self.ctrl_dic:
                 self.ctrl_dic[p].SetValue(self.para[p])
 
@@ -119,14 +124,15 @@ class ParaDialog (wx.Dialog):
         if tag == 'parameter': self.handle = f if not f is None else print
         if tag == 'commit': self.on_ok = f
         if tag == 'cancel': self.on_cancel = f
+        if tag == 'help': self.on_help = f
 
     def show(self):
+        self.pack()
         if self.modal: 
             status =  self.ShowModal() == 5100
             self.Destroy()
             return status
         else: self.Show()
-
 
     def __del__( self ):
         print('panel config deleted!')

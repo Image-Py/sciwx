@@ -2,18 +2,19 @@ import wx, wx.lib.agw.aui as aui
 from .mcanvas import MCanvas3D
 
 class Canvas3DFrame(wx.Frame):
-	def __init__(self, parent=None):
+	def __init__(self, parent=None, scene=None):
 		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY,
 							title = 'Canvas3DFrame',
 							pos = wx.DefaultPosition,
 							size = wx.Size( 800, 600 ),
 							style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 		sizer = wx.BoxSizer(wx.VERTICAL)
-		self.canvas = MCanvas3D(self)
+		self.canvas = MCanvas3D(self, scene)
 		sizer.Add(self.canvas, 1, wx.EXPAND|wx.ALL, 0)
 		self.SetSizer(sizer)
 		self.Bind(wx.EVT_IDLE, self.on_idle)
-
+		self.add_obj = self.canvas.add_obj
+		'''
 		self.view_x = self.canvas.view_x
 		self.view_y = self.canvas.view_y
 		self.view_z = self.canvas.view_z
@@ -23,13 +24,12 @@ class Canvas3DFrame(wx.Frame):
 		self.set_bright = self.canvas.set_bright
 		self.add_surf_asyn = self.canvas.add_surf_asyn
 		self.add_surf = self.canvas.add_surf
-		self.add_mark_asyn = self.canvas.add_mark_asyn
-		self.add_mark = self.canvas.add_mark
 		self.set_mesh = self.canvas.set_mesh
+		'''
 
 	def on_idle(self, event):
-		if self.GetTitle()!=self.canvas.meshset.title:
-			self.SetTitle(self.canvas.meshset.title)
+		if self.GetTitle()!=self.canvas.scene3d.name:
+			self.SetTitle(self.canvas.scene3d.name)
 
 	def set_title(self, tab): self.SetTitle(tab.title)
 
@@ -48,7 +48,7 @@ class Canvas3DNoteBook(wx.lib.agw.aui.AuiNotebook):
 
 	def on_idle(self, event):
 		for i in range(self.GetPageCount()):
-			title = self.GetPage(i).meshset.title
+			title = self.GetPage(i).scene3d.name
 			if self.GetPageText(i) != title:
 				self.SetPageText(i, title)
 
@@ -59,9 +59,9 @@ class Canvas3DNoteBook(wx.lib.agw.aui.AuiNotebook):
 	def set_background(self, img):
 		self.GetAuiManager().SetArtProvider(ImgArtabtProvider(img))
 
-	def add_canvas(self, canvas=None):
-		if canvas is None: canvas = MCanvas3D(self)
-		self.AddPage(canvas, 'Image', True, wx.NullBitmap )
+	def add_canvas(self, scene=None):
+		canvas = MCanvas3D(self, scene)
+		self.AddPage(canvas, 'Mesh', True, wx.NullBitmap )
 		return canvas
 
 	def set_title(self, panel, title):
@@ -69,7 +69,9 @@ class Canvas3DNoteBook(wx.lib.agw.aui.AuiNotebook):
 
 	def on_valid(self, event): pass
 
-	def on_close(self, event): pass
+	def on_close(self, event): 
+		self.GetCurrentPage().close()
+		import gc; gc.collect()
 
 class Canvas3DNoteFrame(wx.Frame):
 	def __init__(self, parent):

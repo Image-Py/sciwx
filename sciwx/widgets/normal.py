@@ -3,7 +3,7 @@ import numpy as np
 
 class NumCtrl(wx.Panel):
     """NumCtrl: diverid from wx.core.TextCtrl """
-    def __init__(self, parent, rang, accury, title, unit):
+    def __init__(self, parent, rang, accury, title, unit, app=None):
         wx.Panel.__init__(self, parent)
         sizer = wx.BoxSizer( wx.HORIZONTAL )
         self.prefix = lab_title = wx.StaticText( self, wx.ID_ANY, title,
@@ -16,7 +16,7 @@ class NumCtrl(wx.Panel):
         sizer.Add( self.ctrl, 2, wx.ALL, 5 )
 
         self.postfix = lab_unit = wx.StaticText( self, wx.ID_ANY, unit,
-                                  wx.DefaultPosition, wx.DefaultSize)
+                                wx.DefaultPosition, wx.DefaultSize)
 
         lab_unit.Wrap( -1 )
         sizer.Add( lab_unit, 0, wx.ALIGN_CENTER|wx.ALL, 5 )
@@ -53,7 +53,7 @@ class NumCtrl(wx.Panel):
         return num
         
 class TextCtrl(wx.Panel):
-    def __init__(self, parent, title, unit):
+    def __init__(self, parent, title, unit, app=None):
         wx.Panel.__init__(self, parent)
         sizer = wx.BoxSizer( wx.HORIZONTAL )
         self.prefix = lab_title = wx.StaticText( self, wx.ID_ANY, title,
@@ -86,7 +86,7 @@ class TextCtrl(wx.Panel):
         return self.ctrl.GetValue()
 
 class ColorCtrl(wx.Panel):
-    def __init__(self, parent, title, unit):
+    def __init__(self, parent, title, unit, app=None):
         wx.Panel.__init__(self, parent)
         sizer = wx.BoxSizer( wx.HORIZONTAL )
         self.prefix = lab_title = wx.StaticText( self, wx.ID_ANY, title,
@@ -139,12 +139,12 @@ class ColorCtrl(wx.Panel):
         return wx.Colour(rgb).Get(False)[::-1]
 
 class PathCtrl(wx.Panel):
-    def __init__(self, parent, title, filt):
+    def __init__(self, parent, filt, io, title, app=None):
         wx.Panel.__init__(self, parent)
         sizer = wx.BoxSizer( wx.HORIZONTAL )
         self.prefix = lab_title = wx.StaticText( self, wx.ID_ANY, title,
                                    wx.DefaultPosition, wx.DefaultSize)
-        self.filt = filt
+        self.filt, self.io = filt, io
         lab_title.Wrap( -1 )
         sizer.Add( lab_title, 0, wx.ALIGN_CENTER|wx.ALL, 5 )
         self.ctrl = wx.TextCtrl(self, wx.TE_RIGHT)
@@ -152,23 +152,26 @@ class PathCtrl(wx.Panel):
         self.SetSizer(sizer)
         
         self.ctrl.Bind(wx.EVT_KEY_UP, self.ontext)
-        self.ctrl.Bind( wx.EVT_LEFT_DOWN, self.onselect)
+        self.ctrl.Bind( wx.EVT_LEFT_DCLICK, self.onselect)
         
     def Bind(self, z, f): self.f = f
         
-    def ontext(self, event): print('ColorCtrl')
+    def ontext(self, event): 
+        self.f(self)
         
     def onselect(self, event):
-        from ...core.manager import ConfigManager
+        if isinstance(self.filt, str): self.filt = self.filt.split(',')
         filt = '|'.join(['%s files (*.%s)|*.%s'%(i.upper(),i,i) for i in self.filt])
-        dpath = ConfigManager.get('defaultpath') or '.'
-        #if dpath==None: dpath = root_dir # './'
         dic = {'open':wx.FD_OPEN, 'save':wx.FD_SAVE}
-        dialog = wx.FileDialog(self, 'Path Select', dpath, '', filt, wx.FD_OPEN)
+        if self.io=='folder':
+            dialog = wx.DirDialog(self, 'Path Select', '', wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST | wx.FD_CHANGE_DIR)
+        else: dialog = wx.FileDialog(self, 'Path Select', '', '.', filt, dic[self.io] | wx.FD_CHANGE_DIR)
+
         rst = dialog.ShowModal()
         if rst == wx.ID_OK:
             path = dialog.GetPath()
             self.ctrl.SetValue(path)
+            self.f(self)
         dialog.Destroy()
         
     def SetValue(self, value):
@@ -178,7 +181,7 @@ class PathCtrl(wx.Panel):
         return self.ctrl.GetValue()
 
 class Choice(wx.Panel):
-    def __init__(self, parent, choices, tp, title, unit):
+    def __init__(self, parent, choices, tp, title, unit, app=None):
         wx.Panel.__init__(self, parent)
         self.tp, self.choices = tp, choices
         sizer = wx.BoxSizer( wx.HORIZONTAL )
@@ -214,7 +217,7 @@ class Choice(wx.Panel):
         return self.tp(self.choices[self.ctrl.GetSelection()])
 
 class AnyType( wx.Panel ):
-    def __init__( self, parent, title, types = ['Int', 'Float', 'Str']):
+    def __init__( self, parent, title, app=None):
         wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size(-1, -1), style = wx.TAB_TRAVERSAL )
         
         sizer = wx.BoxSizer( wx.HORIZONTAL )
@@ -225,7 +228,7 @@ class AnyType( wx.Panel ):
 
         self.txt_value = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
         sizer.Add( self.txt_value, 1, wx.ALIGN_CENTER|wx.ALL, 5 )
-        com_typeChoices = types
+        com_typeChoices = ['Int', 'Float', 'Str']
         self.postfix = self.com_type = wx.ComboBox( self, wx.ID_ANY, 'Float', wx.DefaultPosition, wx.DefaultSize, com_typeChoices, 0 )
         sizer.Add( self.com_type, 0, wx.ALIGN_CENTER|wx.ALL, 5 )
         
@@ -278,7 +281,7 @@ class AnyType( wx.Panel ):
         self.Refresh()
 
 class Choices(wx.Panel):
-    def __init__( self, parent, choices, title):
+    def __init__( self, parent, choices, title, app=None):
         self.choices = list(choices)
         wx.Panel.__init__(self, parent)
 
@@ -308,7 +311,7 @@ class Choices(wx.Panel):
             self.choices.index(i) for i in value if i in self.choices])
 
 class FloatSlider(wx.Panel):
-    def __init__( self, parent, rang, accury, title, unit=''):
+    def __init__( self, parent, rang, accury, title, unit='', app=None):
         self.linux = platform.system() == 'Linux'
         wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size(-1,-1), style = wx.TAB_TRAVERSAL )
         sizer = wx.BoxSizer( wx.VERTICAL )
@@ -327,7 +330,7 @@ class FloatSlider(wx.Panel):
         self.spin = wx.SpinButton( self, wx.ID_ANY, wx.DefaultPosition, wx.Size([20,-1][self.linux],-1),  [0, wx.SP_HORIZONTAL][self.linux])
         self.spin.SetRange(0, 255)
         self.spin.SetValue(128)
-        subsizer.Add( self.spin, 0, wx.ALIGN_CENTER|wx.BOTTOM|wx.EXPAND, 5 )
+        subsizer.Add( self.spin, 0, wx.BOTTOM|wx.EXPAND, 5 )
         self.lab_unit = wx.StaticText( self, wx.ID_ANY, unit, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.lab_unit.Wrap( -1 )
         subsizer.Add( self.lab_unit, 0, wx.ALIGN_CENTER|wx.BOTTOM|wx.LEFT, 5 )
@@ -401,7 +404,7 @@ class FloatSlider(wx.Panel):
         return num
 
 class Label(wx.Panel):
-    def __init__(self, parent, title):
+    def __init__(self, parent, title, app=None):
         wx.Panel.__init__(self, parent)
         sizer = wx.BoxSizer(wx.VERTICAL)
         lab_title = wx.StaticText( self, wx.ID_ANY, title,
@@ -415,7 +418,7 @@ class Label(wx.Panel):
     def GetValue(self, v): pass
 
 class Check(wx.Panel):
-    def __init__(self, parent, title):
+    def __init__(self, parent, title, app=None):
         wx.Panel.__init__(self, parent)
         sizer = wx.BoxSizer(wx.VERTICAL)
         check = wx.CheckBox(self, -1, title)
